@@ -19,16 +19,23 @@ function anvato_require_mexp_files() {
 add_action('mexp_init', 'anvato_require_mexp_files');
 
 /**
- * Register Anvato as a Media Explorer service.
+ * Register Anvato as a Media Explorer service (Shorthand).
+ *
+ *	(this function runs once on a page and should not run more than once,
+ *	it is thus done through a shorthand operation)
  *
  * @param array $services Associative array of Media Explorer services to load.
- * @return array $services Services to load, including this one.
+ * @return array $services Services to load, including Anvato one.
  */
-function mexp_service_anvato(array $services) {
-	return array(ANVATO_DOMAIN_SLUG => new MEXP_Anvato_Service) + $services;
-}
+add_filter('mexp_services', function (array $services) {
 
-add_filter('mexp_services', 'mexp_service_anvato');
+	// add Anvato to MEXP services, if applicable
+	if ( class_exists('MEXP_Anvato_Service') && !array_key_exists(ANVATO_DOMAIN_SLUG, $services) ) {
+		$services[ANVATO_DOMAIN_SLUG] = new MEXP_Anvato_Service;
+	}
+
+	return $services;
+});
 
 /**
  * Tell users with privileges about the Media Explorer plugin if it's missing.
