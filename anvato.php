@@ -28,9 +28,9 @@
  * Make sure to only declare them if they do not already exist,
  * just in case these are already declared custom
 */
-if ( ! defined('ANVATO_PATH') )			define( 'ANVATO_PATH', dirname( __FILE__ ) );
-if ( ! defined('ANVATO_URL') )			define( 'ANVATO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
-if ( ! defined('ANVATO_DOMAIN_SLUG') )	define( 'ANVATO_DOMAIN_SLUG',  "wp_anvato" );
+if ( !defined('ANVATO_PATH') )			define( 'ANVATO_PATH', dirname( __FILE__ ) );
+if ( !defined('ANVATO_URL') )			define( 'ANVATO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
+if ( !defined('ANVATO_DOMAIN_SLUG') )	define( 'ANVATO_DOMAIN_SLUG',  "wp_anvato" );
 
 require_once ANVATO_PATH . '/lib/class-anvato-settings.php';
 require_once ANVATO_PATH . '/lib/class-anvato-library.php';
@@ -38,5 +38,5 @@ require_once ANVATO_PATH . '/lib/class-anvato-library.php';
 if ( !is_admin() ) {
 	require_once ANVATO_PATH . '/lib/shortcode.php';
 } else {
-    require_once ANVATO_PATH . '/mexp/load.php';
+	require_once ANVATO_PATH . '/mexp/load.php';
 }
