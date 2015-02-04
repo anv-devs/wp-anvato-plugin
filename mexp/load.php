@@ -35,6 +35,17 @@ if (is_admin()) {
 	 */
 	add_filter('mexp_services', function (array $services) {
 
+		/*
+			In case where this point is reached, but services and templates are not available
+			but the MEXP endpoint is available...
+			We can assume that the issue is with "mexp_init" action not executing automatically,
+			as is the case on VIP.
+			We can, however, tell the event to run and initiate the necessary functionality manually.
+		*/
+		if ( !class_exists('MEXP_Anvato_Service') && class_exists('MEXP_Service') ) {
+			do_action('mexp_init');
+		}
+
 		// add Anvato to MEXP services, if applicable
 		if ( class_exists('MEXP_Anvato_Service') && !array_key_exists(ANVATO_DOMAIN_SLUG, $services) ) {
 			$services[ANVATO_DOMAIN_SLUG] = new MEXP_Anvato_Service;
