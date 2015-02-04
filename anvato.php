@@ -35,17 +35,8 @@ if ( ! defined('ANVATO_DOMAIN_SLUG') )	define( 'ANVATO_DOMAIN_SLUG',  "wp_anvato
 require_once ANVATO_PATH . '/lib/class-anvato-settings.php';
 require_once ANVATO_PATH . '/lib/class-anvato-library.php';
 
-/**
- * MEXP functionality allows for in-admin lookup and embed of videos from Anvato
- * But since it requires MEXP functionality from https://github.com/Automattic/media-explorer/
- * which might not be available
- * then include MEXP only when it is available
- * to avoid fatals
-*/
-if ( class_exists('MEXP_Service') ) {
-	require_once ANVATO_PATH . '/mexp/load.php';
-}
-
-if ( ! is_admin() ) {
+if ( !is_admin() ) {
 	require_once ANVATO_PATH . '/lib/shortcode.php';
+} else {
+    require_once ANVATO_PATH . '/mexp/load.php';
 }
