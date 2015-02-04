@@ -5,55 +5,64 @@
  * @link  https://github.com/Automattic/media-explorer/
  */
 
-/**
- * Load the files required for Media Explorer integration (Shorthand)
- *
- *	(this function runs once on a page and should not run more than once,
- *	it is thus done through a shorthand operation)
- *
- */
-add_action('mexp_init', function () {
-	require_once ANVATO_PATH . '/mexp/service.php';
-	require_once ANVATO_PATH . '/mexp/template.php';
-}, 10, 0);
 
 /**
- * Register Anvato as a Media Explorer service (Shorthand).
- *
- *	(this function runs once on a page and should not run more than once,
- *	it is thus done through a shorthand operation)
- *
- * @param array $services Associative array of Media Explorer services to load.
- * @return array $services Services to load, including Anvato one.
- */
-add_filter('mexp_services', function (array $services) {
+ * The following functionality is not required to run for regular user,
+ * it should be available _only_ for WP Administration panel use.
+*/
+if (is_admin()) {
 
-	// add Anvato to MEXP services, if applicable
-	if ( class_exists('MEXP_Anvato_Service') && !array_key_exists(ANVATO_DOMAIN_SLUG, $services) ) {
-		$services[ANVATO_DOMAIN_SLUG] = new MEXP_Anvato_Service;
+	/**
+	 * Load the files required for Media Explorer integration (Shorthand)
+	 *
+	 *	(this function runs once on a page and should not run more than once,
+	 *	it is thus done through a shorthand operation)
+	 *
+	 */
+	add_action('mexp_init', function () {
+		require_once ANVATO_PATH . '/mexp/service.php';
+		require_once ANVATO_PATH . '/mexp/template.php';
+	}, 10, 0);
+
+	/**
+	 * Register Anvato as a Media Explorer service (Shorthand).
+	 *
+	 *	(this function runs once on a page and should not run more than once,
+	 *	it is thus done through a shorthand operation)
+	 *
+	 * @param array $services Associative array of Media Explorer services to load.
+	 * @return array $services Services to load, including Anvato one.
+	 */
+	add_filter('mexp_services', function (array $services) {
+
+		// add Anvato to MEXP services, if applicable
+		if ( class_exists('MEXP_Anvato_Service') && !array_key_exists(ANVATO_DOMAIN_SLUG, $services) ) {
+			$services[ANVATO_DOMAIN_SLUG] = new MEXP_Anvato_Service;
+		}
+
+		return $services;
+	});
+
+	/**
+	 * Tell users with privileges about the Media Explorer plugin if it's missing.
+	 */
+	function anvato_add_mexp_notice() {
+		if (!class_exists('MEXP_Service') && current_user_can('install_plugins')) {
+			add_action('admin_notices', 'anvato_mexp_nag');
+		}
 	}
 
-	return $services;
-});
+	add_action('load-settings_page_anvato', 'anvato_add_mexp_notice', 10, 1);
 
-/**
- * Tell users with privileges about the Media Explorer plugin if it's missing.
- */
-function anvato_add_mexp_notice() {
-	if (!class_exists('MEXP_Service') && current_user_can('install_plugins')) {
-		add_action('admin_notices', 'anvato_mexp_nag');
+	/**
+	 * Display the notice about the Media Explorer plugin.
+	 */
+	function anvato_mexp_nag() {
+		?>
+		<div class="update-nag">
+			<p><?php _e('<strong>Even easier embedding</strong>: You can search for Anvato videos and add shortcodes directly from the Add Media screen by installing the <a href="https://github.com/Automattic/media-explorer/">Media Explorer plugin</a>.', ANVATO_DOMAIN_SLUG); ?></p>
+		</div>
+		<?php
 	}
-}
 
-add_action('load-settings_page_anvato', 'anvato_add_mexp_notice', 10, 1);
-
-/**
- * Display the notice about the Media Explorer plugin.
- */
-function anvato_mexp_nag() {
-	?>
-	<div class="update-nag">
-		<p><?php _e('<strong>Even easier embedding</strong>: You can search for Anvato videos and add shortcodes directly from the Add Media screen by installing the <a href="https://github.com/Automattic/media-explorer/">Media Explorer plugin</a>.', ANVATO_DOMAIN_SLUG); ?></p>
-	</div>
-	<?php
 }
