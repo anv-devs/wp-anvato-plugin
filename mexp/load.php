@@ -19,10 +19,11 @@ if (is_admin()) {
 	 *	it is thus done through a shorthand operation)
 	 *
 	 */
-	add_action('mexp_init', function () {
+	add_action('mexp_init', 'anvato_load_dependencies', 10, 0);
+	function anvato_load_dependencies () {
 		require_once ANVATO_PATH . '/mexp/service.php';
 		require_once ANVATO_PATH . '/mexp/template.php';
-	}, 10, 0);
+	}
 
 	/**
 	 * Register Anvato as a Media Explorer service (Shorthand).
@@ -43,7 +44,7 @@ if (is_admin()) {
 			We can, however, tell the event to run and initiate the necessary functionality manually.
 		*/
 		if ( !class_exists('MEXP_Anvato_Service') && class_exists('MEXP_Service') ) {
-			do_action('mexp_init');
+			anvato_load_dependencies();
 		}
 
 		// add Anvato to MEXP services, if applicable
