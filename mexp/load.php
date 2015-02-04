@@ -6,17 +6,16 @@
  */
 
 /**
- * Load the files required for Media Explorer integration.
+ * Load the files required for Media Explorer integration (Shorthand)
  *
- * @see  MEXP_Anvato_Service, which uses anvato_generate_shortcode().
+ *	(this function runs once on a page and should not run more than once,
+ *	it is thus done through a shorthand operation)
+ *
  */
-function anvato_require_mexp_files() {
-	require_once ANVATO_PATH . '/lib/shortcode.php';
+add_action('mexp_init', function () {
 	require_once ANVATO_PATH . '/mexp/service.php';
 	require_once ANVATO_PATH . '/mexp/template.php';
-}
-
-add_action('mexp_init', 'anvato_require_mexp_files');
+}, 10, 0);
 
 /**
  * Register Anvato as a Media Explorer service (Shorthand).
