@@ -91,7 +91,7 @@ class MEXP_Anvato_Service extends MEXP_Service {
 			$item->set_date_format("M j, Y, g:i a");
 			$item->set_id(intval((string) $video->upload_id));
 			$item->set_thumbnail((string) $video->src_image_url);
-			$item->url = anvato_generate_shortcode((string) $video->upload_id);
+			$item->url = $this->generate_shortcode((string) $video->upload_id);
 			/**
 			 * Filter the video item to be added to the response.
 			 *
@@ -120,7 +120,7 @@ class MEXP_Anvato_Service extends MEXP_Service {
 			$icon_url = $icon_url === "" ? ANVATO_URL . 'mexp/img/channel_icon.png' : $icon_url;
 			$item->set_id( (string) $channel->embed_id );
 			$item->set_thumbnail( $icon_url );
-			$item->url = anvato_generate_shortcode((string) $channel->embed_id );
+			$item->url = $this->generate_shortcode((string) $channel->embed_id );
 			$item->set_date( time() );
 			$item->set_date_format("M j, Y, g:i a");
 			/**
@@ -148,7 +148,7 @@ class MEXP_Anvato_Service extends MEXP_Service {
                                 $item->set_thumbnail( (string) $channel->icon_url );
                                 $item->set_date( time() );
                                 $item->set_date_format("M j, Y, g:i a");
-                                $item->url = anvato_generate_shortcode((string) $mchannel->embed_id);
+                                $item->url = $this->generate_shortcode((string) $mchannel->embed_id);
                                 $response->add_item(apply_filters('anvato_mexp_response_item', $item, $mchannel));
                             }
 			}
@@ -156,6 +156,16 @@ class MEXP_Anvato_Service extends MEXP_Service {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Generate an [anvplayer] shortcode for use in the editor.
+	 *
+	 * @param int $video The video ID
+	 * @return string The shortcode
+	 */
+	private function generate_shortcode( $video_id ) {
+		return '[anvplayer video="' . esc_attr($video_id) . '"]';
 	}
 
 	/**

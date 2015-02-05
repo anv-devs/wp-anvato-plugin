@@ -22,14 +22,21 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-define( 'ANVATO_PATH', dirname( __FILE__ ) );
-define( 'ANVATO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
-define( 'ANVATO_DOMAIN_SLUG',  "wp_anvato" );
+
+/**
+ * Declare the necessary defines
+ * Make sure to only declare them if they do not already exist,
+ * just in case these are already declared custom
+*/
+if ( !defined('ANVATO_PATH') )			define( 'ANVATO_PATH', dirname( __FILE__ ) );
+if ( !defined('ANVATO_URL') )			define( 'ANVATO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
+if ( !defined('ANVATO_DOMAIN_SLUG') )	define( 'ANVATO_DOMAIN_SLUG',  "wp_anvato" );
 
 require_once ANVATO_PATH . '/lib/class-anvato-settings.php';
 require_once ANVATO_PATH . '/lib/class-anvato-library.php';
-require_once ANVATO_PATH . '/mexp/load.php';
 
-if ( ! is_admin() ) {
+if ( !is_admin() ) {
 	require_once ANVATO_PATH . '/lib/shortcode.php';
+} else {
+	require_once ANVATO_PATH . '/mexp/load.php';
 }

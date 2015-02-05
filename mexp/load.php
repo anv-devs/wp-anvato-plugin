@@ -5,49 +5,76 @@
  * @link  https://github.com/Automattic/media-explorer/
  */
 
-/**
- * Load the files required for Media Explorer integration.
- *
- * @see  MEXP_Anvato_Service, which uses anvato_generate_shortcode().
- */
-function anvato_require_mexp_files() {
-	require_once ANVATO_PATH . '/lib/shortcode.php';
-	require_once ANVATO_PATH . '/mexp/service.php';
-	require_once ANVATO_PATH . '/mexp/template.php';
-}
-
-add_action('mexp_init', 'anvato_require_mexp_files');
 
 /**
- * Register Anvato as a Media Explorer service.
- *
- * @param array $services Associative array of Media Explorer services to load.
- * @return array $services Services to load, including this one.
- */
-function mexp_service_anvato(array $services) {
-	return array(ANVATO_DOMAIN_SLUG => new MEXP_Anvato_Service) + $services;
-}
+ * The following functionality is not required to run for regular user,
+ * it should be available _only_ for WP Administration panel use.
+*/
+if (is_admin()) {
 
-add_filter('mexp_services', 'mexp_service_anvato');
-
-/**
- * Tell users with privileges about the Media Explorer plugin if it's missing.
- */
-function anvato_add_mexp_notice() {
-	if (!class_exists('MEXP_Service') && current_user_can('install_plugins')) {
-		add_action('admin_notices', 'anvato_mexp_nag');
+	/**
+	 * Load the files required for Media Explorer integration (Shorthand)
+	 *
+	 *	(this function runs once on a page and should not run more than once,
+	 *	it is thus done through a shorthand operation)
+	 *
+	 */
+	add_action('mexp_init', 'anvato_load_dependencies', 10, 0);
+	function anvato_load_dependencies () {
+		require_once ANVATO_PATH . '/mexp/service.php';
+		require_once ANVATO_PATH . '/mexp/template.php';
 	}
-}
 
-add_action('load-settings_page_anvato', 'anvato_add_mexp_notice', 10, 1);
+	/**
+	 * Register Anvato as a Media Explorer service (Shorthand).
+	 *
+	 *	(this function runs once on a page and should not run more than once,
+	 *	it is thus done through a shorthand operation)
+	 *
+	 * @param array $services Associative array of Media Explorer services to load.
+	 * @return array $services Services to load, including Anvato one.
+	 */
+	add_filter('mexp_services', function (array $services) {
 
-/**
- * Display the notice about the Media Explorer plugin.
- */
-function anvato_mexp_nag() {
-	?>
-	<div class="update-nag">
-		<p><?php _e('<strong>Even easier embedding</strong>: You can search for Anvato videos and add shortcodes directly from the Add Media screen by installing the <a href="https://github.com/Automattic/media-explorer/">Media Explorer plugin</a>.', ANVATO_DOMAIN_SLUG); ?></p>
-	</div>
-	<?php
+		/*
+			In case where this point is reached, but services and templates are not available
+			but the MEXP endpoint is available...
+			We can assume that the issue is with "mexp_init" action not executing automatically,
+			as is the case on VIP.
+			We can, however, tell the event to run and initiate the necessary functionality manually.
+		*/
+		if ( !class_exists('MEXP_Anvato_Service') && class_exists('MEXP_Service') ) {
+			anvato_load_dependencies();
+		}
+
+		// add Anvato to MEXP services, if applicable
+		if ( class_exists('MEXP_Anvato_Service') && !array_key_exists(ANVATO_DOMAIN_SLUG, $services) ) {
+			$services[ANVATO_DOMAIN_SLUG] = new MEXP_Anvato_Service;
+		}
+
+		return $services;
+	});
+
+	/**
+	 * Tell users with privileges about the Media Explorer plugin if it's missing.
+	 */
+	function anvato_add_mexp_notice() {
+		if (!class_exists('MEXP_Service') && current_user_can('install_plugins')) {
+			add_action('admin_notices', 'anvato_mexp_nag');
+		}
+	}
+
+	add_action('load-settings_page_anvato', 'anvato_add_mexp_notice', 10, 1);
+
+	/**
+	 * Display the notice about the Media Explorer plugin.
+	 */
+	function anvato_mexp_nag() {
+		?>
+		<div class="update-nag">
+			<p><?php _e('<strong>Even easier embedding</strong>: You can search for Anvato videos and add shortcodes directly from the Add Media screen by installing the <a href="https://github.com/Automattic/media-explorer/">Media Explorer plugin</a>.', ANVATO_DOMAIN_SLUG); ?></p>
+		</div>
+		<?php
+	}
+
 }
