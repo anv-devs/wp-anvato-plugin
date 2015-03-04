@@ -34,7 +34,8 @@ if (is_admin()) {
 	 * @param array $services Associative array of Media Explorer services to load.
 	 * @return array $services Services to load, including Anvato one.
 	 */
-	add_filter('mexp_services', function (array $services) {
+	add_filter('mexp_services', anvato_mexp_services);
+        function anvato_mexp_services(array $services) {
 
 		/*
 			In case where this point is reached, but services and templates are not available
@@ -53,8 +54,8 @@ if (is_admin()) {
 		}
 
 		return $services;
-	});
-
+	}
+        
 	/**
 	 * Tell users with privileges about the Media Explorer plugin if it's missing.
 	 */

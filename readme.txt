@@ -1,7 +1,7 @@
 == Anvato Video Plugin ==
 Contributors: Anvato
 Tags: anvato, media, video player, media explorer, live stream player
-Stable tag: 1.0
+Stable tag: 1.1
 
 == Description ==
 A WordPress Plugin for integrating the Anvato video player. This plugin lets you add a shortcode for Anvato video into your content. You can easily find your Anvato video by searching with this plugin. 

@@ -93,22 +93,19 @@ class Anvato_Settings {
 		}
 		echo '</h2>';
 	}
-	
+
 	public function mcp_settings_init()
 	{
  
 		$this->plugin_settings_tabs[self::general_settings_key] = "MCP";
-		
+
 		register_setting( self::general_settings_key, self::general_settings_key, array( self::$instance, 'sanitize_options' ) );
 		add_settings_section( 'section_mcp', 'MCP Settings', array( self::$instance, 'section_mcp_desc' ), self::general_settings_key );
 		// Fields
-		add_settings_field( 'mcp_url', __( 'MCP URL:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::general_settings_key, 'section_mcp', array( "key" => self::general_settings_key, 'field' => 'mcp_url' ) );
-		add_settings_field( 'mcp_id', __( 'MCP ID:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::general_settings_key, 'section_mcp', array( "key" => self::general_settings_key, 'field' => 'mcp_id' ) );
-		add_settings_field( 'station_id', __( 'Station ID:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::general_settings_key, 'section_mcp', array( "key" => self::general_settings_key, 'field' => 'station_id' ) );
-		add_settings_field( 'public_key', __( 'Public Key:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::general_settings_key, 'section_mcp', array( "key" => self::general_settings_key, 'field' => 'public_key' ) );
-		add_settings_field( 'private_key', __( 'Private Key:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::general_settings_key, 'section_mcp', array( "key" => self::general_settings_key, 'field' => 'private_key') );
+		add_settings_field( 'mcp_config', __( 'API Configuration:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'textbox' ), self::general_settings_key, 'section_mcp', array( "key" => self::general_settings_key, 'field' => 'mcp_config' ) );
+		
 	}
-
+        
 	public function player_settings_init()
 	{
 		$this->plugin_settings_tabs[self::player_settings_key] = "Player";
@@ -145,6 +142,7 @@ class Anvato_Settings {
 
 		add_settings_section( 'section_monetization', 'Monetization Settings', array( self::$instance, 'section_monetization_desc' ), self::monetization_settings_key );
 		add_settings_field( 'adtag', __( 'DFP Premium Ad Tag:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::monetization_settings_key, 'section_monetization',  array( "key" => self::monetization_settings_key, 'field' => 'adtag' ) );
+		add_settings_field( 'advanced_targeting', __( 'Advanced Targeting:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'textbox' ), self::monetization_settings_key, 'section_monetization',  array( "key" => self::monetization_settings_key, 'field' => 'advanced_targeting' ) );
 
 	}
 	
@@ -182,6 +180,16 @@ class Anvato_Settings {
 
 		printf( '<input type="%s" name="%s[%s]" value="%s" size="50" />', esc_attr( $args['type'] ), esc_attr( $args['key'] ), esc_attr( $args['field'] ), esc_attr( $this->get_option( $args['key'], $args['field'] ) ) );
 	} 
+        
+	public function textbox( $args ) 
+	{
+		if ( empty( $args['field'] ) ) {
+			return;
+		}
+
+                printf( '<textarea name="%s[%s]" class="large-text code" rows="15">%s</textarea>', esc_attr( $args['key'] ), esc_attr( $args['field'] ), esc_textarea( $this->get_option( $args['key'], $args['field'] ) ) );
+                 
+	} 
 	
 	public function field_px( $args ) 
 	{
@@ -203,7 +211,7 @@ class Anvato_Settings {
 		
 		return isset( $this->options[ $key ][ $field ] ) ? $this->options[ $key ][ $field ] : null;
 	}
-	
+
 	function section_mcp_desc()		{ echo '<hr/>'; }
 	function section_player_desc()	{ echo '<hr/>'; }
 	function section_analytics_desc()	{ echo '<hr/>'; }
@@ -211,7 +219,6 @@ class Anvato_Settings {
 	
 	function wp_plugin_actions( $links, $file ) 
 	{
-		error_log($file);
 		if( $file === 'wp-anvato-plugin/anvato.php' && function_exists( "admin_url" ) ) 
 		{
 			$settings_link = '<a href="' . admin_url( 'options-general.php?page='.ANVATO_DOMAIN_SLUG ) . '">' . __('Settings') . '</a>';
@@ -219,6 +226,13 @@ class Anvato_Settings {
 		}	
 		return $links;
 	}
+        
+        static function get_mcp_options ()
+        {
+            $settings = (array) get_option( self::general_settings_key );
+            $json = json_decode($settings['mcp_config'], TRUE);
+            return $json;
+        }
 }
 
 function Anvato_Settings() {

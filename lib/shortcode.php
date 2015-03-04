@@ -10,15 +10,14 @@ $anvato_player_index = 0;
  */
 function anvato_shortcode( $attr ) {
 	global $anvato_player_index;
-	$mcp = Anvato_Settings()->get_options(Anvato_Settings::general_settings_key);
+	$mcp = Anvato_Settings()->get_mcp_options();
 	$player = Anvato_Settings()->get_options(Anvato_Settings::player_settings_key);
 	$analytics = Anvato_Settings()->get_options(Anvato_Settings::analytics_settings_key);
 	$monetization = Anvato_Settings()->get_options(Anvato_Settings::monetization_settings_key);
 
 	# Set the attributes which the shortcode can override
 	$json = shortcode_atts( array(
-		'mcp'        => $mcp['mcp_id'],
-		'station_id' => $mcp['station_id'],
+		'mcp'        => $mcp['mcp']['id'],
 		'width'      => $player['width'],
 		'height'     => $player['height'],
 		'video'      => null,
@@ -32,11 +31,13 @@ function anvato_shortcode( $attr ) {
 	$player_url = ! empty( $attr['player_url'] ) ? $attr['player_url'] : $player['player_url'];
 
 	# Set the DFP Ad Tag, which can also be overridden
-	if ( ! empty( $monetization['adtag'] ) && ( ! isset( $attr['plugin_dfp_adtagurl'] ) || ( empty( $attr['plugin_dfp_adtagurl'] ) && $attr['plugin_dfp_adtagurl'] !== 'false' ) ) ) {
+	if ( empty($monetization['advanced_targeting']) && ! empty( $monetization['adtag'] ) && ( ! isset( $attr['plugin_dfp_adtagurl'] ) || ( empty( $attr['plugin_dfp_adtagurl'] ) && $attr['plugin_dfp_adtagurl'] !== 'false' ) ) ) {
 		$json['plugins']['dfp'] = array( 'adTagUrl' => $monetization['adtag'] );
 	} elseif ( ! empty( $attr['plugin_dfp_adtagurl'] ) && $attr['plugin_dfp_adtagurl'] !== 'false' ) {
 		$json['plugins']['dfp'] = array( 'adTagUrl' => urldecode($attr['plugin_dfp_adtagurl']) );
-	}
+	} elseif ( !empty($monetization['advanced_targeting']) ) {
+                $json['plugins']['dfp'] = json_decode($monetization['advanced_targeting'], true );
+        }
 	
 	# Set the Tracker ID, which can be overridden
 	if ( ! isset( $attr['tracker_id'] ) && ! empty( $player['tracker_id'] ) ) {
@@ -65,14 +66,25 @@ function anvato_shortcode( $attr ) {
 			$json['plugins']['omniture']['trackingServer'] = $attr['adobe_trackingserver'];
 		}
 	}
- 
+        
         $video_ids = explode(",", $json["video"]);
 	if ( sizeof($video_ids) > 1 )
 	{
 		unset($json["video"]);
 		$json["playlist"] = $video_ids;
 	}
+        elseif( isset($attr['playlist']) )
+        {
+                unset($json["video"]);
+		$json["playlist"] = $attr['playlist'];
+        }
 
+        if ( isset($mcp['mcp']['tkx_key']) )
+        {
+            $json['config']['accessKey'] = $mcp['mcp']['tkx_key'];
+            $json['config']['accessControl']['preview'] = false;
+        }
+        
 	# Clean up attributes as need be
 	$json['autoplay'] = ( 'true' == $json['autoplay'] );
 

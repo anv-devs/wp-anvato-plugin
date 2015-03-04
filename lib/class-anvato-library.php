@@ -26,6 +26,13 @@ class Anvato_Library {
 	private $general_settings;
 
 	/**
+	 * The value of the stations settings.
+	 *
+	 * @var array.
+	 */
+	private $selected_station;
+
+	/**
 	 * The body of the XML request to send to the API.
 	 *
 	 * @todo Possibly convert to a printf()-friendly string for substituting
@@ -47,7 +54,7 @@ class Anvato_Library {
 	 */
 	private function __construct() 
 	{
-		$this->general_settings = get_option( Anvato_Settings::general_settings_key );
+		$this->general_settings = Anvato_Settings()->get_mcp_options();
 	}
 
 	/**
@@ -68,7 +75,7 @@ class Anvato_Library {
 	 * @return boolean.
 	 */
 	public function has_required_settings() {
-		return ! ( empty( $this->general_settings ) || false !== array_search( '', array( $this->general_settings['mcp_url'], $this->general_settings['public_key'], $this->general_settings['private_key'] ) ) );
+		return ! ( empty( $this->general_settings ) || false !== array_search( '', array( $this->general_settings['mcp']['url'], $this->selected_station['public_key'], $this->selected_station['private_key'] ) ) );
 	}
 
 	/**
@@ -80,7 +87,7 @@ class Anvato_Library {
 	 * @return string.
 	 */
 	private function build_request_signature( $time ) {
-		return base64_encode( hash_hmac( 'sha256', $this->xml_body . $time, $this->general_settings['private_key'], true ) );
+		return base64_encode( hash_hmac( 'sha256', $this->xml_body . $time, $this->selected_station['private_key'], true ) );
 	}
 
 	/**
@@ -93,7 +100,6 @@ class Anvato_Library {
 	 */
 	private function build_request_params( $args = array() ) {
 		$params = array();
-
 		foreach( $args as $key => $value ) {
 			switch ( $key ) {
 				case 'lk' :
@@ -103,7 +109,6 @@ class Anvato_Library {
 				break;
 			}
 		}
-
 		return $params;
 	}
 
@@ -121,10 +126,10 @@ class Anvato_Library {
 	private function build_request_url( $params = array(), $time ) {
 		return sprintf(
 			$this->api_request_url,
-			esc_url( $this->general_settings['mcp_url'] ),
+			esc_url( $this->general_settings['mcp']['url'] ),
 			$time,
 			urlencode( $this->build_request_signature( $time ) ),
-			$this->general_settings['public_key'],
+			$this->selected_station['public_key'],
 			build_query( $params )
 		);
 	}
@@ -181,7 +186,7 @@ class Anvato_Library {
 		} else {
 			$response = wp_remote_get( $url, $args );
 		}
-                
+
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		} elseif ( wp_remote_retrieve_response_code( $response ) === 200 ) {
@@ -204,6 +209,7 @@ class Anvato_Library {
 	 * @return array|WP_Error Array with SimpleXMLElements of any videos found, or WP_Error on failure.
 	 */
 	public function search( $args = array() ) {
+
 		$defaults = array(
 			'lk' => '',
 		);
@@ -212,12 +218,29 @@ class Anvato_Library {
                 {
                     $api_method = "list_embeddable_channels";
                 }
-		else
+		elseif($args['type'] === "vod" )
                 {
                     $api_method = "list_videos";
                 }
-		
-		$args = wp_parse_args( $args, $defaults );
+		elseif($args['type'] === "playlist" )
+                {
+                    $api_method = "list_playlists";
+                }
+                
+                if ( $args['station'] === '' )
+                {
+                        return new WP_Error( 'missing_required_settings', __( 'Please select station.', ANVATO_DOMAIN_SLUG  ) );
+                }
+
+                foreach ( $this->general_settings['owners'] as $ow_item )
+                {
+                    if( $args['station'] === $ow_item['id'] )
+                    {
+                        $this->selected_station = $ow_item;
+                        break;
+                    }
+                }
+                
 		$this->xml_body = str_replace("%API_METHOD%", $api_method, $this->xml_body );
 
 		$response = $this->request( $this->build_request_params( $args ) );
@@ -230,6 +253,10 @@ class Anvato_Library {
 				if( $api_method === 'list_videos' )
                                 {
                                     return $xml->params->video_list->xpath( "//video" );
+                                }
+				if( $api_method === 'list_playlists' )
+                                {
+                                    return $xml->params->video_list->xpath( "//playlist" );
                                 }
 				elseif ($api_method === 'list_embeddable_channels')
 				{

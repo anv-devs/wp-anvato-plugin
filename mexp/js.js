@@ -14,6 +14,7 @@
 // CONTROLLER OVERIDE:
 
 media.controller.MEXP = media.controller.State.extend({
+
 	initialize: function(options) {
 		this.props = new Backbone.Collection();
 		for (var tab in options.tabs) {
@@ -36,6 +37,7 @@ media.controller.MEXP = media.controller.State.extend({
 	},
 	refresh: function() {
 		this.frame.toolbar.get().refresh();
+                this.attachEvents();
 	},
 	mexpInsert: function() {
 		var shortcode = "";
@@ -83,14 +85,15 @@ media.controller.MEXP = media.controller.State.extend({
 			return "<p>" + _shortcode + "</p>";
 		}
 	}
+        
 });
 
-function anv_preview(mcp_id, video_id)
+function anv_preview(mcp_id, video_id, type)
 {
+        var ptype = type === 'video' || type === 'live' ? 'video' : 'playlist';
 	var player_js_url = "http://qa.up.anv.bz/dev/scripts/anvload.js";
-	
 	var script = jQuery("<script src='"+player_js_url+"'></script>");
-	script.attr("data-anvp", '{\"mcp\":\"' + mcp_id + '\", \"pInstance\": \"anv_preview_cont\", \"video\":\"' + video_id + '\", \"autoplay\": \"true\"}');
+	script.attr("data-anvp", '{\"mcp\":\"' + mcp_id + '\", \"pInstance\": \"anv_preview_cont\", \"'+ptype+'\":\"' + video_id + '\", \"autoplay\": \"true\"}');
 
 	var div = jQuery("<div class='anv_preview'><div id=\"anv_preview_cont\"></div><a class=\"anv_preview_close\" href='Javascript://' onclick=\"anv_preview_close()\"></a></div>");
 	div.append(script).insertBefore('.mexp-content-wp_anvato > .mexp-items');
@@ -105,12 +108,12 @@ function anv_preview_close()
 
 function anv_type_select(el)
 {
-	if ( el.value === 'live') {
-		window.anv_playlist_enabled = false;
+	if ( el.value === 'vod') {
+		window.anv_playlist_enabled = true;
 	}
 	else
 	{
-		window.anv_playlist_enabled = true;
+		window.anv_playlist_enabled = false;
 	}
 	
 	jQuery('#anv_search_form').submit();
