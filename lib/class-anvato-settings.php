@@ -131,6 +131,10 @@ class Anvato_Settings {
 		add_settings_field( 'adobe_profile', __( 'Profile:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::analytics_settings_key, 'section_analytics', array( "key" => self::analytics_settings_key,'field' => 'adobe_profile' ) );
 		add_settings_field( 'adobe_account', __( 'Account:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::analytics_settings_key, 'section_analytics', array( "key" => self::analytics_settings_key,'field' => 'adobe_account' ) );
 		add_settings_field( 'adobe_trackingserver', __( 'Tracking Server:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::analytics_settings_key, 'section_analytics', array( "key" => self::analytics_settings_key, 'field' => 'adobe_trackingserver' ) );
+                // Fields
+		add_settings_section( 'section_comscore', 'Comscore Analytics', array( self::$instance, 'section_analytics_desc' ), self::analytics_settings_key );
+		add_settings_field( 'comscore_client_id', __( 'Client ID:', ANVATO_DOMAIN_SLUG ), array( self::$instance, 'field' ), self::analytics_settings_key, 'section_comscore', array( "key" => self::analytics_settings_key, 'field' => 'comscore_client_id' ) );
+		
 
 	}
 	

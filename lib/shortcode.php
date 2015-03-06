@@ -40,8 +40,8 @@ function anvato_shortcode( $attr ) {
         }
 	
 	# Set the Tracker ID, which can be overridden
-	if ( ! isset( $attr['tracker_id'] ) && ! empty( $player['tracker_id'] ) ) {
-		$json['plugins']['analytics'] = array( 'pdb' => $player['tracker_id'] );
+	if ( ! isset( $attr['tracker_id'] ) && ! empty( $analytics['tracker_id'] ) ) {
+		$json['plugins']['analytics'] = array( 'pdb' => $analytics['tracker_id'] );
 	} elseif ( isset( $attr['tracker_id'] ) && 'false' !== $attr['tracker_id'] ) {
 		$json['plugins']['analytics'] = array( 'pdb' => $attr['tracker_id'] );
 	}
@@ -66,6 +66,14 @@ function anvato_shortcode( $attr ) {
 			$json['plugins']['omniture']['trackingServer'] = $attr['adobe_trackingserver'];
 		}
 	}
+        
+        # Set Comscore Ids
+        if ( ! isset( $attr['comscore_client_id'] ) && ! empty( $analytics['comscore_client_id'] ) ) {
+		$json['plugins']['comscore'] = array( 'clientId' => $analytics['comscore_client_id'] );
+	} elseif ( isset( $attr['comscore_client_id'] ) && 'false' !== $attr['comscore_client_id'] ) {
+		$json['plugins']['comscore'] = array( 'clientId' => $attr['comscore_client_id'] );
+	}
+        
         
         $video_ids = explode(",", $json["video"]);
 	if ( sizeof($video_ids) > 1 )
