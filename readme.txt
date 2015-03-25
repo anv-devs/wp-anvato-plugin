@@ -42,3 +42,5 @@ This plugin has a shortcode supports to prepare Anvato video embed code automati
 * `height`
 * `autoplay`
 * `adobe_analytics` (accepts only `false`, which removes all Adobe settings from the output)
+
+
