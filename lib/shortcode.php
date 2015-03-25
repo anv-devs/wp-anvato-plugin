@@ -66,6 +66,37 @@ function anvato_shortcode( $attr ) {
 			$json['plugins']['omniture']['trackingServer'] = $attr['adobe_trackingserver'];
 		}
 	}
+
+        # Set Heartbeat 
+        if ( ! isset( $attr['heartbeat_account_id'] ) && ! empty( $analytics['heartbeat_account_id'] ) ) {
+		$json['plugins']['heartbeat'] = array( 'account' => $analytics['heartbeat_account_id'] );
+	} elseif ( isset( $attr['heartbeat_account_id'] ) && 'false' !== $attr['heartbeat_account_id'] ) {
+		$json['plugins']['heartbeat'] = array( 'account' => $attr['heartbeat_account_id'] );
+	}
+        
+        if ( ! isset( $attr['heartbeat_publisher_id'] ) && ! empty( $analytics['heartbeat_publisher_id'] ) ) {
+		$json['plugins']['heartbeat'] = array( 'publisherId' => $analytics['heartbeat_publisher_id'] );
+	} elseif ( isset( $attr['heartbeat_publisher_id'] ) && 'false' !== $attr['heartbeat_publisher_id'] ) {
+		$json['plugins']['heartbeat'] = array( 'publisherId' => $attr['heartbeat_publisher_id'] );
+	}
+        
+        if ( ! isset( $attr['heartbeat_job_id'] ) && ! empty( $analytics['heartbeat_job_id'] ) ) {
+		$json['plugins']['heartbeat'] = array( 'jobId' => $analytics['heartbeat_job_id'] );
+	} elseif ( isset( $attr['heartbeat_job_id'] ) && 'false' !== $attr['heartbeat_job_id'] ) {
+		$json['plugins']['heartbeat'] = array( 'jobId' => $attr['heartbeat_job_id'] );
+	}
+        
+        if ( ! isset( $attr['heartbeat_marketing_id'] ) && ! empty( $analytics['heartbeat_marketing_id'] ) ) {
+		$json['plugins']['heartbeat'] = array( 'marketingCloudId' => $analytics['heartbeat_marketing_id'] );
+	} elseif ( isset( $attr['heartbeat_marketing_id'] ) && 'false' !== $attr['heartbeat_marketing_id'] ) {
+		$json['plugins']['heartbeat'] = array( 'marketingCloudId' => $attr['heartbeat_marketing_id'] );
+	}
+        
+        if ( ! isset( $attr['heartbeat_tracking_server'] ) && ! empty( $analytics['heartbeat_tracking_server'] ) ) {
+		$json['plugins']['heartbeat'] = array( 'trackingServer' => $analytics['heartbeat_tracking_server'] );
+	} elseif ( isset( $attr['heartbeat_tracking_server'] ) && 'false' !== $attr['heartbeat_tracking_server'] ) {
+		$json['plugins']['heartbeat'] = array( 'trackingServer' => $attr['heartbeat_tracking_server'] );
+	}
         
         # Set Comscore Ids
         if ( ! isset( $attr['comscore_client_id'] ) && ! empty( $analytics['comscore_client_id'] ) ) {

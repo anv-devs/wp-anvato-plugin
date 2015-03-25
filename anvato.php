@@ -3,7 +3,7 @@
 	Plugin Name: Anvato Video Plugin
 	Plugin URI: http://www.anvato.com/
 	Description: This plugin allows a WordPress user to browse the Anvato Media Content Platform (MCP), choose a video and auto generate a shortcode to embed video into the post.
-	Version: 1.0
+	Version: 1.1.2
 	Author: Anvato
 	Author URI: http://www.anvato.com/
 */
