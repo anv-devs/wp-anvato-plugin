@@ -79,52 +79,6 @@ class Anvato_Settings {
 	public function admin_settings_page_setup() {
 
 		if (!is_admin()) return;
-		
-		/*if( isset($_GET['reset-settings']) ) {
-			delete_option( self::general_settings_key );
-			delete_option( self::player_settings_key );
-			delete_option( self::monetization_settings_key );
-			delete_option( self::analytics_settings_key );
-			wp_redirect('?page=' . ANVATO_DOMAIN_SLUG . '#autosetup');
-		} else {
-			$this->remote_setup = get_option( self::general_settings_key ) === FALSE ? TRUE : FALSE;
-		}*/
-
-		/*
-		if( isset($_POST['manual_setup']) ) {
-
-			//add_option( self::general_settings_key,  array(), null , 'no' );
-			//$this->remote_setup = FALSE;
-
-		} elseif (isset($_POST['remote_setup']) && $_POST['remote_setup_key'] !== '' ) {
-
-			$conf = json_decode(base64_decode($_POST['remote_setup_key']) , true);
-
-			// check is valid?
-			if( !is_array($conf) ) {
-				$this->remote_setup_state = FALSE;
-			} else {
-				$raw_content = file_get_contents("https://{$conf['b']}.s3.amazonaws.com/wordpress/conf/{$conf['k']}");
-				// Where's the failsafe?
-				// Where is the transient?
-				$setup = json_decode($raw_content, TRUE);
-
-				if ( isset($setup['mcp']) && isset($setup['player']) ) {
-					add_option( self::player_settings_key,  $setup['player'], null ,'no' );
-
-					unset($setup['player']);
-					add_option( self::general_settings_key, array("mcp_config"=> json_encode($setup) ), null ,'no' );
-
-					$this->remote_setup = FALSE;
-					$this->remote_setup_state = TRUE;
-				} else {
-					$this->remote_setup_state = FALSE;
-				}
-			}
-
-		}
-		*/
-
 
 		// Player Options
 
