@@ -360,17 +360,6 @@ class Anvato_Settings {
 				}, 
 				self::general_settings_key
 			);
-				add_settings_field( 
-					'mcp_config', 
-					__( 'API Configuration:', ANVATO_DOMAIN_SLUG ), 
-					array( 'Anvato_Form_Fields', 'textarea' ),
-					self::general_settings_key, 
-					'section_mcp',
-					array( 
-						'name' => self::general_settings_key . '[mcp_config]',
-						'value' => $mcp_settings_value,
-					)
-				);
 			if ( empty ( $mcp_settings_value ) ) { // only use this field when there is no "mcp_config" setup
 				add_settings_field( 
 					'mcp_config_automatic_key', 
@@ -384,6 +373,17 @@ class Anvato_Settings {
 					)
 				);
 			}
+				add_settings_field( 
+					'mcp_config', 
+					__( 'API Configuration:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'textarea' ),
+					self::general_settings_key, 
+					'section_mcp',
+					array( 
+						'name' => self::general_settings_key . '[mcp_config]',
+						'value' => $mcp_settings_value,
+					)
+				);
 		
 	} // admin options setup
 
