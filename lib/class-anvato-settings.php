@@ -379,6 +379,8 @@ class Anvato_Settings {
 
 		// Access Options
 
+		$mcp_settings_value = $this->get_option ( self::general_settings_key, 'mcp_config' );
+
 		$this->plugin_settings_tabs[self::general_settings_key] = "Access";
 		register_setting( 
 			self::general_settings_key, 
@@ -393,17 +395,30 @@ class Anvato_Settings {
 				}, 
 				self::general_settings_key
 			);
-			add_settings_field( 
-				'mcp_config', 
-				__( 'API Configuration:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'textarea' ),
-				self::general_settings_key, 
-				'section_mcp',
-				array( 
-					'name' => self::general_settings_key . '[mcp_config]',
-					'value' => $this->get_option( self::general_settings_key, 'mcp_config' ),
-				)
-			);
+				add_settings_field( 
+					'mcp_config', 
+					__( 'API Configuration:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'textarea' ),
+					self::general_settings_key, 
+					'section_mcp',
+					array( 
+						'name' => self::general_settings_key . '[mcp_config]',
+						'value' => $mcp_settings_value,
+					)
+				);
+			if ( empty ( $mcp_settings_value ) ) { // only use this field when there is no "mcp_config" setup
+				add_settings_field( 
+					'mcp_config_automatic_key', 
+					__( 'Auto Configuration Key:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::general_settings_key, 
+					'section_mcp', 
+					array( 
+						'name' => self::general_settings_key . '[mcp_config_automatic_key]',
+						'value' => '', // value for this key shoudl always be blank!
+					)
+				);
+			}
 		
 	} // admin options setup
 
@@ -516,7 +531,15 @@ class Anvato_Settings {
 			and the rest should be handled here.
 		*/
 		if ( array_key_exists( 'mcp_config', $clean ) ) {
-			if ( empty( $clean['mcp_config'] ) ) {
+			
+			if ( !empty( $clean['mcp_config_automatic_key'] ) ) {
+				// For when we can do automatic setup from the 64bit key
+
+				// here comes the FUN part!!!
+
+			} else if ( empty( $clean['mcp_config'] ) ) {
+				// for when the mcp_config is empty
+
 				delete_option( self::general_settings_key ); // delete the database item
 
 				// and then we want to get out of the process altogether and not create a DB item
@@ -525,8 +548,10 @@ class Anvato_Settings {
 					'&tab=' . self::general_settings_key 
 				));
 				exit; // terminate advancing further, so the redirect works proper
+
 			}
-		}
+
+		} // end of special case for MCP settings
 
 		return $clean;
 	}
