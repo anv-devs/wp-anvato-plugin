@@ -395,76 +395,49 @@ class Anvato_Settings {
 		if (!is_admin()) return;
 
 		?>
-		
-		<?php if ( $this->remote_setup ) : ?>
 
-			<div class="wrap">
-				<h2><img src="<?php echo esc_url( ANVATO_URL . 'img/logo.png' ) ?>" alt="<?php esc_attr_e( 'Anvato Video Plugin Settings', ANVATO_DOMAIN_SLUG ); ?>" /></h2>
+		<?php
+			reset( $this->plugin_settings_tabs ); // reset array pointer
+			$active_tab = key( $this->plugin_settings_tabs );
+			if ( !empty( $_GET['tab'] ) ) {
+				$active_tab = $_GET['tab'];
+			}
+		?>
+		<div class="wrap">
+			<h2><img src="<?php echo esc_url( ANVATO_URL . 'img/logo.png' ) ?>" alt="<?php esc_attr_e( 'Anvato Video Plugin Settings', ANVATO_DOMAIN_SLUG ); ?>" /></h2>
 
-				<?php if( $this->remote_setup_state === FALSE) : ?>
-					<div id="message" class="error">
-						<p>
-							<strong>Sorry, we encountered an error during setup. Please check your setup key and try again.</strong>
-						</p>
-					</div>';    
-				<?php endif; ?>
+			<?php if( $this->remote_setup_state === TRUE) : ?>
+				<div id="message" class="updated">
+					<p>
+						<strong>Your plugin is successfully setup.</strong>
+					</p>
+				</div>
+			<?php endif; ?>
 
-				<h3>Welcome to Anvato Wordpress Plugin</h3>
-				<p>To setup this plugin automatically, please enter your setup key provided by Anvato. If you don't have a setup key, press Manual Setup.</p>
-				<form method="POST" action="">
-					<input name="remote_setup_key" type="text" value="" style="width: 100%; max-width: 80%" />
-					<hr/>
-					<?php submit_button( 'Automated Setup', 'primary large', 'remote_setup', false ); ?>
-					<?php submit_button( 'Manual Setup', 'secondary large', 'manual_setup', false ); ?>
-				</form>
-			</div>
+			<p>Anvato Wordpress Plugin allows Anvato Media Content Platform customers to easily insert players into posts that play video on demand clips as well as live channels.</p>
 
-		<?php else : ?>
+			<?php screen_icon(); ?>
+			<h2 class="nav-tab-wrapper">
+				<?php foreach ( $this->plugin_settings_tabs as $key => $name ) : ?>
+					<?php
+						$tab_class = array('nav-tab');
+						if ($active_tab == $key) $tab_class[] = 'nav-tab-active';
+					?>
+					<a class="<?php echo esc_attr(implode(' ', $tab_class)); ?>" href="<?php echo esc_url(admin_url('options-general.php?page=' . ANVATO_DOMAIN_SLUG . '&tab=' . $key)); ?>"><?php echo esc_html($name); ?></a>
+				<?php endforeach; ?>
+			</h2>
 
-			<?php
-				reset( $this->plugin_settings_tabs ); // reset array pointer
-				$active_tab = key( $this->plugin_settings_tabs );
-				if ( !empty( $_GET['tab'] ) ) {
-					$active_tab = $_GET['tab'];
-				}
-			?>
-			<div class="wrap">
-				<h2><img src="<?php echo esc_url( ANVATO_URL . 'img/logo.png' ) ?>" alt="<?php esc_attr_e( 'Anvato Video Plugin Settings', ANVATO_DOMAIN_SLUG ); ?>" /></h2>
+			<form method="post" action="options.php">
+				<?php wp_nonce_field( 'anvato-update-options' ); ?>
+				<?php settings_fields( $active_tab ); ?>
+				<?php do_settings_sections( $active_tab ); ?>
 
-				<?php if( $this->remote_setup_state === TRUE) : ?>
-					<div id="message" class="updated">
-						<p>
-							<strong>Your plugin is successfully setup.</strong>
-						</p>
-					</div>
-				<?php endif; ?>
+				<hr/>
 
-				<p>Anvato Wordpress Plugin allows Anvato Media Content Platform customers to easily insert players into posts that play video on demand clips as well as live channels.</p>
+				<?php submit_button(); ?>
+			</form>
 
-				<?php screen_icon(); ?>
-				<h2 class="nav-tab-wrapper">
-					<?php foreach ( $this->plugin_settings_tabs as $key => $name ) : ?>
-						<?php
-							$tab_class = array('nav-tab');
-							if ($active_tab == $key) $tab_class[] = 'nav-tab-active';
-						?>
-						<a class="<?php echo esc_attr(implode(' ', $tab_class)); ?>" href="<?php echo esc_url(admin_url('options-general.php?page=' . ANVATO_DOMAIN_SLUG . '&tab=' . $key)); ?>"><?php echo esc_html($name); ?></a>
-					<?php endforeach; ?>
-				</h2>
-
-				<form method="post" action="options.php">
-					<?php wp_nonce_field( 'anvato-update-options' ); ?>
-					<?php settings_fields( $active_tab ); ?>
-					<?php do_settings_sections( $active_tab ); ?>
-
-					<hr/>
-
-					<?php submit_button(); ?>
-				</form>
-
-			</div>
-
-		<?php endif; ?>
+		</div>
 
 		<?php
 	}
