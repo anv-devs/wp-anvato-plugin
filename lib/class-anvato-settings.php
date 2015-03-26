@@ -381,6 +381,17 @@ class Anvato_Settings {
 
 		$mcp_settings_value = $this->get_option ( self::general_settings_key, 'mcp_config' );
 
+		/*
+			If there are no core settings for the plugin, 
+			we should not show ANY other tabs, until the core settings a setup.
+
+			The fields are still decalred and can be used through WordPress Settings API,
+			but the tabs are not supposed to show
+		*/
+		if (empty($mcp_settings_value)) {
+			$this->plugin_settings_tabs = array();
+		}
+
 		$this->plugin_settings_tabs[self::general_settings_key] = "Access";
 		register_setting( 
 			self::general_settings_key, 
@@ -457,7 +468,11 @@ class Anvato_Settings {
 		<?php else : ?>
 
 			<?php
-				$active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : self::player_settings_key;
+				reset( $this->plugin_settings_tabs ); // reset array pointer
+				$active_tab = key( $this->plugin_settings_tabs );
+				if ( !empty( $_GET['tab'] ) ) {
+					$active_tab = $_GET['tab'];
+				}
 			?>
 			<div class="wrap">
 				<h2><img src="<?php echo esc_url( ANVATO_URL . 'img/logo.png' ) ?>" alt="<?php esc_attr_e( 'Anvato Video Plugin Settings', ANVATO_DOMAIN_SLUG ); ?>" /></h2>
