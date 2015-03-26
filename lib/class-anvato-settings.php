@@ -551,6 +551,7 @@ class Anvato_Settings {
 				// For when we can do automatic setup from the 64bit key
 
 				$autoconfigkey_decoded = json_decode( base64_decode( $clean['mcp_config_automatic_key'] ) , true );
+				unset($clean['mcp_config_automatic_key']); // remove the auto-key. Don't store it
 
 				if ( !empty( $autoconfigkey_decoded['b'] ) && !empty( $autoconfigkey_decoded['k'] ) ) {
 					$result_response = wp_remote_get(
