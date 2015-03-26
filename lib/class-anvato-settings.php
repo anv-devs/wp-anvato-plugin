@@ -496,10 +496,37 @@ class Anvato_Settings {
 		$clean = array();
 
 		// if its not array, make it into one
-		if (!is_array($dirty)) {
+		if ( !is_array($dirty) ) {
 			$dirty = (array) $dirty;
 		}
 		$clean = array_map('sanitize_text_field', $dirty);
+		
+		/*
+			Special case for clearing and managing MCP settings.
+
+			The general idea is to check if the "mcp_config" key is present, but empty.
+			If that is the case
+				- clear the key
+				- delete the database refference
+				- redirect to the clean version of the same page
+					- Redirect is done to prevent the automatic WP's setup from creating a default empty DB line
+
+			This way if you ever decide to disable the plugin, 
+			just delete all the data from the "MCP Settings -> API Configuration" block
+			and the rest should be handled here.
+		*/
+		if ( array_key_exists( 'mcp_config', $clean ) ) {
+			if ( empty( $clean['mcp_config'] ) ) {
+				delete_option( self::general_settings_key ); // delete the database item
+
+				// and then we want to get out of the process altogether and not create a DB item
+				wp_redirect(admin_url(
+					'options-general.php?page=' . ANVATO_DOMAIN_SLUG . 
+					'&tab=' . self::general_settings_key 
+				));
+				exit; // terminate advancing further, so the redirect works proper
+			}
+		}
 
 		return $clean;
 	}
