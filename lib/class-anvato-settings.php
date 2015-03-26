@@ -550,7 +550,41 @@ class Anvato_Settings {
 			if ( !empty( $clean['mcp_config_automatic_key'] ) ) {
 				// For when we can do automatic setup from the 64bit key
 
-				// here comes the FUN part!!!
+				$autoconfigkey_decoded = json_decode( base64_decode( $clean['mcp_config_automatic_key'] ) , true );
+
+				if ( !empty( $autoconfigkey_decoded['b'] ) && !empty( $autoconfigkey_decoded['k'] ) ) {
+					$result_response = wp_remote_get(
+						'https://' . $autoconfigkey_decoded['b'] . '.s3.amazonaws.com/wordpress/conf/' . $autoconfigkey_decoded['k']
+					);
+
+					// We don't need transient, since this will not be used often.
+
+					if ( !is_wp_error( $result_response ) ) {
+						$result = wp_remote_retrieve_body( $result_response );
+
+						if ( !empty( $result ) ) {
+							$result = json_decode( $result, TRUE );
+
+							// Set automatic Main settings
+							if ( !empty( $result['mcp'] ) ) {
+
+								// Set automatic Player settings
+								if ( !empty( $result['player'] ) ) {
+									// this will not overwrite existing options!
+									add_option( self::player_settings_key,  $result['player'], '', 'no' );
+									unset( $result['player'] );
+								}
+
+								// set MCP main settings to everything without the player settings
+								// should include "mcp" and "owners" settings
+								$clean['mcp_config'] = sanitize_text_field( json_encode($result) );
+
+							} // if not empty mcp_config
+						}
+
+					} // end if erro with retrieval of auto settings
+
+				} // end if the key had proper parts
 
 			} else if ( empty( $clean['mcp_config'] ) ) {
 				// for when the mcp_config is empty
