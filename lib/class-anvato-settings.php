@@ -10,6 +10,7 @@ if ( !class_exists( 'Anvato_Settings' ) ) :
 class Anvato_Settings {
 
 	// Option storage key names
+	const automatic_setup_key = 'anvato_plugin_setup';
 	const general_settings_key = 'anvato_mcp';
 	const player_settings_key = 'anvato_player';
 	const analytics_settings_key = 'anvato_analytics';
@@ -25,15 +26,12 @@ class Anvato_Settings {
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
 			self::$instance = new Anvato_Settings;
-			//self::$instance->setup_actions(); // !! This can't be here
 		}
 		return self::$instance;
 	}
 
 	protected function __construct() {
-
 		$this->admin_settings();
-
 	}
 
 	/**
@@ -76,70 +74,68 @@ class Anvato_Settings {
 	/**
 	 * Setup all the tabs, links and fields for the admin panel
 	 */
-	public function admin_settings_page_setup() {
-
+	public function admin_settings_page_setup() 
+	{
+    
 		if (!is_admin()) return;
 
-		$mcp_settings_value = $this->get_option ( self::general_settings_key, 'mcp_config' );
-
-		/*
-			If there are no core settings for the plugin, 
+		$setup_key_value = $this->get_option ( self::automatic_setup_key, 0 );
+ 		/*
+			If there are no setup key for the plugin, 
 			we should not show ANY other tabs, until the core settings a setup.
-
-			The fields are still decalred and can be used through WordPress Settings API,
-			but the tabs are not supposed to show
+			When setup finished, setup key will be false
 		*/
-		
-		if (empty($mcp_settings_value)) {
+		if ( $setup_key_value === FALSE ):
+
 		    $this->plugin_settings_tabs = array();
-		    $this->plugin_settings_tabs[self::general_settings_key] = "Plugin Setup";
+		    $this->plugin_settings_tabs[self::automatic_setup_key] = "Plugin Setup";
 
 		    register_setting( 
-			    self::general_settings_key, 
-			    self::general_settings_key, 
+			    self::automatic_setup_key, 
+			    self::automatic_setup_key, 
 			    array( self::$instance, 'sanitize_options', ) 
 		    );
 		    
 			add_settings_section(
-				'section_mcp', 
+				'section_setup', 
 				__( 'Welcome to Automatic Setup', ANVATO_DOMAIN_SLUG ), 
 				function(){
 					echo "To setup this plugin automatically, please enter your setup key provided by Anvato. If you don't have a setup key, press Manual Setup.";
 				}, 
-				self::general_settings_key
+				self::automatic_setup_key
 			);
 
 			    add_settings_field( 
 				    'mcp_config_automatic_key', 
 				    __( 'Auto Configuration Key:', ANVATO_DOMAIN_SLUG ), 
 				    array( 'Anvato_Form_Fields', 'field' ),
-				    self::general_settings_key, 
-				    'section_mcp', 
+				    self::automatic_setup_key, 
+				    'section_setup', 
 				    array( 
-					    'name' => self::general_settings_key . '[mcp_config_automatic_key]',
-					    'value' => '', // value for this key shoudl always be blank!
+					    'name' => self::automatic_setup_key . '[mcp_config_automatic_key]',
+					    'value' => ''
 				    )
 			    );
-		     
-		    return;
-		}
+		    $this->remote_setup = true;
+
+		else:
 		
-		// Attaching regular setting feilds
 		// Player Options
+		$this->plugin_settings_tabs = array();
 		$this->plugin_settings_tabs[self::player_settings_key] = "Player";
 		register_setting( 
 			self::player_settings_key, 
 			self::player_settings_key, 
 			array( self::$instance, 'sanitize_options', )
 		);
-		    add_settings_section( 
-			    'section_player', 
-			    __( 'Player Settings', ANVATO_DOMAIN_SLUG ), 
-			    function() {
-				    echo '<hr/>';
-			    }, 
-			    self::player_settings_key 
-		    );
+			add_settings_section( 
+				'section_player', 
+				__( 'Player Settings', ANVATO_DOMAIN_SLUG ), 
+				function() {
+					echo '<hr/>';
+				}, 
+				self::player_settings_key 
+			);
 			add_settings_field( 
 				'player_url', 
 				__( 'Player URL*:', ANVATO_DOMAIN_SLUG ), 
@@ -178,161 +174,161 @@ class Anvato_Settings {
 				) 
 			);
 
+
 		// Analytics
-			
+
 		$this->plugin_settings_tabs[self::analytics_settings_key] = "Analytics";
 		register_setting( 
 			self::analytics_settings_key, 
 			self::analytics_settings_key, 
 			array( self::$instance, 'sanitize_options', )
 		);
-		
-		// Anvato Analytics Block
-		add_settings_section(
-			'section_anvato_analytics', 
-			__( 'Anvato Analytics Settings', ANVATO_DOMAIN_SLUG ), 
-			function() {
-				echo '<hr/>';
-			}, 
-			self::analytics_settings_key
-		);
-			add_settings_field(
-				'tracker_id', 
-				__( 'Tracker ID:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
+			// Anvato Analytics Block
+			add_settings_section(
 				'section_anvato_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[tracker_id]',
-					'value' => $this->get_option( self::analytics_settings_key, 'tracker_id' ),
-				)
+				__( 'Anvato Analytics Settings', ANVATO_DOMAIN_SLUG ), 
+				function() {
+					echo '<hr/>';
+				}, 
+				self::analytics_settings_key
 			);
-		// Adobe Analytics Block
-		add_settings_section( 
-			'section_adobe_analytics', 
-			__( 'Adobe Analytics Settings', ANVATO_DOMAIN_SLUG ), 
-			function() {
-				echo '<hr/>';
-			}, 
-			self::analytics_settings_key
-		);
-			add_settings_field( 
-				'adobe_profile', 
-				__( 'Profile:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
+				add_settings_field(
+					'tracker_id', 
+					__( 'Tracker ID:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_anvato_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[tracker_id]',
+						'value' => $this->get_option( self::analytics_settings_key, 'tracker_id' ),
+					)
+				);
+			// Adobe Analytics Block
+			add_settings_section( 
 				'section_adobe_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[adobe_profile]',
-					'value' => $this->get_option( self::analytics_settings_key, 'adobe_profile' ),
-				)
+				__( 'Adobe Analytics Settings', ANVATO_DOMAIN_SLUG ), 
+				function() {
+					echo '<hr/>';
+				}, 
+				self::analytics_settings_key
 			);
-			add_settings_field( 
-				'adobe_account', 
-				__( 'Account:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
-				'section_adobe_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[adobe_account]',
-					'value' => $this->get_option( self::analytics_settings_key, 'adobe_account' ),
-				)
-			);
-			add_settings_field( 
-				'adobe_trackingserver', 
-				__( 'Tracking Server:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
-				'section_adobe_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[adobe_trackingserver]',
-					'value' => $this->get_option( self::analytics_settings_key, 'adobe_trackingserver' ),
-				)
-			);
-		// Heartbeet Analytics Block
-		add_settings_section( 
-			'section_heartbeet_analytics', 
-			__( 'Heartbeat Analytics Settings', ANVATO_DOMAIN_SLUG ), 
-			function() {
-				echo '<hr/>';
-			}, 
-			self::analytics_settings_key
-		);
-			add_settings_field( 
-				'heartbeat_account_id', 
-				__( 'Account ID:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
+				add_settings_field( 
+					'adobe_profile', 
+					__( 'Profile:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_adobe_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[adobe_profile]',
+						'value' => $this->get_option( self::analytics_settings_key, 'adobe_profile' ),
+					)
+				);
+				add_settings_field( 
+					'adobe_account', 
+					__( 'Account:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_adobe_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[adobe_account]',
+						'value' => $this->get_option( self::analytics_settings_key, 'adobe_account' ),
+					)
+				);
+				add_settings_field( 
+					'adobe_trackingserver', 
+					__( 'Tracking Server:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_adobe_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[adobe_trackingserver]',
+						'value' => $this->get_option( self::analytics_settings_key, 'adobe_trackingserver' ),
+					)
+				);
+			// Heartbeet Analytics Block
+			add_settings_section( 
 				'section_heartbeet_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[heartbeat_account_id]',
-					'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_account_id' ),
-				)
+				__( 'Heartbeat Analytics Settings', ANVATO_DOMAIN_SLUG ), 
+				function() {
+					echo '<hr/>';
+				}, 
+				self::analytics_settings_key
 			);
-			add_settings_field( 
-				'heartbeat_publisher_id', 
-				__( 'Publisher ID:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
-				'section_heartbeet_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[heartbeat_publisher_id]',
-					'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_publisher_id' ),
-				)
-			);
-			add_settings_field( 
-				'heartbeat_job_id', 
-				__( 'Job ID:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
-				'section_heartbeet_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[heartbeat_job_id]',
-					'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_job_id' ),
-				)
-			);
-			add_settings_field( 
-				'heartbeat_marketing_id', 
-				__( 'Cloud ID:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
-				'section_heartbeet_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[heartbeat_marketing_id]',
-					'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_marketing_id' ),
-				)
-			);
-			add_settings_field( 
-				'heartbeat_tracking_server', 
-				__( 'Traking Server:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
-				'section_heartbeet_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[heartbeat_tracking_server]',
-					'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_tracking_server' ),
-				)
-			);
-		// Comscore Analytics Block
-		add_settings_section( 
-			'section_comscore_analytics', 
-			__( 'Comscore Analytics Settings', ANVATO_DOMAIN_SLUG ), 
-			function() {
-				echo '<hr/>';
-			}, 
-			self::analytics_settings_key
-		);
-			add_settings_field( 
-				'comscore_client_id',
-				__( 'Client ID:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::analytics_settings_key, 
+				add_settings_field( 
+					'heartbeat_account_id', 
+					__( 'Account ID:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_heartbeet_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[heartbeat_account_id]',
+						'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_account_id' ),
+					)
+				);
+				add_settings_field( 
+					'heartbeat_publisher_id', 
+					__( 'Publisher ID:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_heartbeet_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[heartbeat_publisher_id]',
+						'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_publisher_id' ),
+					)
+				);
+				add_settings_field( 
+					'heartbeat_job_id', 
+					__( 'Job ID:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_heartbeet_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[heartbeat_job_id]',
+						'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_job_id' ),
+					)
+				);
+				add_settings_field( 
+					'heartbeat_marketing_id', 
+					__( 'Cloud ID:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_heartbeet_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[heartbeat_marketing_id]',
+						'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_marketing_id' ),
+					)
+				);
+				add_settings_field( 
+					'heartbeat_tracking_server', 
+					__( 'Traking Server:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_heartbeet_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[heartbeat_tracking_server]',
+						'value' => $this->get_option( self::analytics_settings_key, 'heartbeat_tracking_server' ),
+					)
+				);
+			// Comscore Analytics Block
+			add_settings_section( 
 				'section_comscore_analytics', 
-				array( 
-					'name' => self::analytics_settings_key . '[comscore_client_id]',
-					'value' => $this->get_option( self::analytics_settings_key, 'comscore_client_id' ),
-				)
+				__( 'Comscore Analytics Settings', ANVATO_DOMAIN_SLUG ), 
+				function() {
+					echo '<hr/>';
+				}, 
+				self::analytics_settings_key
 			);
+				add_settings_field( 
+					'comscore_client_id',
+					__( 'Client ID:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::analytics_settings_key, 
+					'section_comscore_analytics', 
+					array( 
+						'name' => self::analytics_settings_key . '[comscore_client_id]',
+						'value' => $this->get_option( self::analytics_settings_key, 'comscore_client_id' ),
+					)
+				);
 
 
 		// Monetization options
@@ -343,78 +339,94 @@ class Anvato_Settings {
 			self::monetization_settings_key, 
 			array( self::$instance, 'sanitize_options', )
 		);
-		
-		add_settings_section( 
-			'section_monetization', 
-			__( 'Monetization Settings', ANVATO_DOMAIN_SLUG ), 
-			function() {
-				echo '<hr/>';
-			}, 
-			self::monetization_settings_key 
-		);
-			add_settings_field( 
-				'adtag', 
-				__( 'DFP Premium Ad Tag:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::monetization_settings_key, 
+			add_settings_section( 
 				'section_monetization', 
-				array( 
-					'name' => self::monetization_settings_key . '[adtag]',
-					'value' => $this->get_option( self::monetization_settings_key, 'adtag' ),
-				)
+				__( 'Monetization Settings', ANVATO_DOMAIN_SLUG ), 
+				function() {
+					echo '<hr/>';
+				}, 
+				self::monetization_settings_key 
 			);
-			add_settings_field( 
-				'advanced_targeting', 
-				__( 'Advanced Targeting:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'field' ),
-				self::monetization_settings_key, 
-				'section_monetization', 
-				array( 
-					'name' => self::monetization_settings_key . '[advanced_targeting]',
-					'value' => $this->get_option( self::monetization_settings_key, 'advanced_targeting' ),
-				)
-			);
+				add_settings_field( 
+					'adtag', 
+					__( 'DFP Premium Ad Tag:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::monetization_settings_key, 
+					'section_monetization', 
+					array( 
+						'name' => self::monetization_settings_key . '[adtag]',
+						'value' => $this->get_option( self::monetization_settings_key, 'adtag' ),
+					)
+				);
+				add_settings_field( 
+					'advanced_targeting', 
+					__( 'Advanced Targeting:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'field' ),
+					self::monetization_settings_key, 
+					'section_monetization', 
+					array( 
+						'name' => self::monetization_settings_key . '[advanced_targeting]',
+						'value' => $this->get_option( self::monetization_settings_key, 'advanced_targeting' ),
+					)
+				);
 
 
 		// Access Options
-		add_settings_section(
-			'section_mcp', 
-			__( 'MCP Settings', ANVATO_DOMAIN_SLUG ), 
-			function(){
-				echo '<hr/>';
-			}, 
-			self::general_settings_key
-		);
 
-			add_settings_field( 
-				'mcp_config', 
-				__( 'API Configuration:', ANVATO_DOMAIN_SLUG ), 
-				array( 'Anvato_Form_Fields', 'textarea' ),
-				self::general_settings_key, 
-				'section_mcp',
-				array( 
-					'name' => self::general_settings_key . '[mcp_config]',
-					'value' => $mcp_settings_value,
-				)
+		$mcp_settings_value = $this->get_option ( self::general_settings_key, 'mcp_config' );
+
+		$this->plugin_settings_tabs[self::general_settings_key] = "Access";
+		register_setting( 
+			self::general_settings_key, 
+			self::general_settings_key, 
+			array( self::$instance, 'sanitize_options', ) 
+		);
+			add_settings_section(
+				'section_mcp', 
+				__( 'MCP Settings', ANVATO_DOMAIN_SLUG ), 
+				function(){
+					echo '<hr/>';
+				}, 
+				self::general_settings_key
 			);
-		
+				add_settings_field( 
+					'mcp_config', 
+					__( 'API Configuration:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'textarea' ),
+					self::general_settings_key, 
+					'section_mcp',
+					array( 
+						'name' => self::general_settings_key . '[mcp_config]',
+						'value' => $mcp_settings_value,
+					)
+				);
+				
+				
+				add_settings_field( 
+					'reset_settings', 
+					__( 'Reset settings:', ANVATO_DOMAIN_SLUG ), 
+					array( 'Anvato_Form_Fields', 'reset_check' ),
+					self::general_settings_key, 
+					'section_mcp', 
+					array(
+						'name' => self::general_settings_key . '[reset_settings]',
+					)
+				);
+		endif;
+
 	} // admin options setup
 
 	/**
 	 * Function to display and manage settings on the admin page
 	 */
 	public function admin_settings_page_view() {
-
 		if (!is_admin()) return;
 
-		?>
-
-		<?php
-			reset( $this->plugin_settings_tabs ); // reset array pointer
-			$active_tab = key( $this->plugin_settings_tabs );
-			if ( !empty( $_GET['tab'] ) ) {
-				$active_tab = $_GET['tab'];
-			}
+		reset( $this->plugin_settings_tabs ); // reset array pointer
+		$active_tab = key( $this->plugin_settings_tabs );
+		if ( !empty( $_GET['tab'] ) ) {
+			$active_tab = $_GET['tab'];
+		}
 		?>
 		<div class="wrap">
 			<h2><img src="<?php echo esc_url( ANVATO_URL . 'img/logo.png' ) ?>" alt="<?php esc_attr_e( 'Anvato Video Plugin Settings', ANVATO_DOMAIN_SLUG ); ?>" /></h2>
@@ -445,7 +457,16 @@ class Anvato_Settings {
 				<?php settings_fields( $active_tab ); ?>
 				<?php do_settings_sections( $active_tab ); ?>
 				<hr/>
-				<?php submit_button(); ?>
+				
+				<?php 
+				if( $this->remote_setup ) : // User wants make a manual setup so secondary button was added even though it usesless. ?>
+					<?php submit_button( 'Automated Setup', 'primary large', 'remote_setup', false ); ?>
+					<?php submit_button( 'Manual Setup', 'secondary large', 'manual_setup', false ); ?>
+				<?php 
+				else:
+					submit_button();
+				endif; ?>
+				
 			</form>
 
 		</div>
@@ -460,7 +481,8 @@ class Anvato_Settings {
 	 * @param string $dirty
 	 * @return string
 	 */
-	function sanitize_options( $dirty ) {
+	function sanitize_options( $dirty ) 
+	{
 		$clean = array();
 
 		// if its not array, make it into one
@@ -468,82 +490,88 @@ class Anvato_Settings {
 			$dirty = (array) $dirty;
 		}
 		$clean = array_map('sanitize_text_field', $dirty);
-		
-		/*
-			Special case for clearing and managing MCP settings.
 
-			The general idea is to check if the "mcp_config" key is present, but empty.
-			If that is the case
-				- clear the key
-				- delete the database refference
-				- redirect to the clean version of the same page
-					- Redirect is done to prevent the automatic WP's setup from creating a default empty DB line
-
-			This way if you ever decide to disable the plugin, 
-			just delete all the data from the "MCP Settings -> API Configuration" block
-			and the rest should be handled here.
-		*/
-		if ( array_key_exists( 'mcp_config', $clean ) ) {
+		if ( array_key_exists( 'mcp_config_automatic_key', $clean ) ) 
+		{
 			
-			if ( !empty( $clean['mcp_config_automatic_key'] ) ) {
+			$result = "";
+			if ( !empty( $clean['mcp_config_automatic_key'] ) ) { 
 				// For when we can do automatic setup from the 64bit key
+				$result = $this->do_autosetup($clean['mcp_config_automatic_key']);
+				unset($clean['mcp_config_automatic_key']);
+			} 
+			
+			add_option( self::automatic_setup_key, $result, '', 'no' );
+			// and then we want to get out of the process altogether and not create a DB item
+			wp_redirect(admin_url(
+				'options-general.php?page=' . ANVATO_DOMAIN_SLUG . 
+				'&setup-success=true'  
+			));
+			exit; // terminate advancing further, so the redirect works proper
+		} 
+		elseif ( array_key_exists('reset_settings', $clean ) ) 
+		{
+		    /*
+		     * Check the reset action was stored. If yes, clean up all stored settings and then 
+		     * redirect user to automatic setup screen  
+		     */
+		    delete_option(self::general_settings_key);
+		    delete_option(self::player_settings_key);
+		    delete_option(self::monetization_settings_key);
+		    delete_option(self::analytics_settings_key);
+		    delete_option(self::automatic_setup_key);
 
-				$autoconfigkey_decoded = json_decode( base64_decode( $clean['mcp_config_automatic_key'] ) , true );
-				unset($clean['mcp_config_automatic_key']); // remove the auto-key. Don't store it
-
-				if ( !empty( $autoconfigkey_decoded['b'] ) && !empty( $autoconfigkey_decoded['k'] ) ) {
-					$result_response = wp_remote_get(
-						'https://' . $autoconfigkey_decoded['b'] . '.s3.amazonaws.com/wordpress/conf/' . $autoconfigkey_decoded['k']
-					);
-
-					// We don't need transient, since this will not be used often.
-
-					if ( !is_wp_error( $result_response ) ) {
-						$result = wp_remote_retrieve_body( $result_response );
-
-						if ( !empty( $result ) ) {
-							$result = json_decode( $result, TRUE );
-
-							// Set automatic Main settings
-							if ( !empty( $result['mcp'] ) ) {
-
-								// Set automatic Player settings
-								if ( !empty( $result['player'] ) ) {
-									// this will not overwrite existing options!
-									add_option( self::player_settings_key,  $result['player'], '', 'no' );
-									unset( $result['player'] );
-								}
-
-								// set MCP main settings to everything without the player settings
-								// should include "mcp" and "owners" settings
-								$clean['mcp_config'] = sanitize_text_field( json_encode($result) );
-
-							} // if not empty mcp_config
-						}
-
-					} // end if erro with retrieval of auto settings
-
-				} // end if the key had proper parts
-
-			} else if ( empty( $clean['mcp_config'] ) ) {
-				// for when the mcp_config is empty
-
-				delete_option( self::general_settings_key ); // delete the database item
-
-				// and then we want to get out of the process altogether and not create a DB item
-				wp_redirect(admin_url(
-					'options-general.php?page=' . ANVATO_DOMAIN_SLUG . 
-					'&tab=' . self::general_settings_key 
-				));
-				exit; // terminate advancing further, so the redirect works proper
-
-			}
-
-		} // end of special case for MCP settings
-
+		    wp_redirect(admin_url(
+			    'options-general.php?page=' . ANVATO_DOMAIN_SLUG . 
+			    '&reset-success=true'  
+		    ));
+		    exit; // terminate advancing further, so the redirect works proper
+		}
+		
 		return $clean;
 	}
+	
+	private function do_autosetup( $key )
+	{
+	    $autoconfigkey_decoded = json_decode( base64_decode( $key) , true );
 
+	    if ( !empty( $autoconfigkey_decoded['b'] ) && !empty( $autoconfigkey_decoded['k'] ) ) {
+		    $result_response = wp_remote_get(
+			    "http://{$autoconfigkey_decoded['b']}.s3.amazonaws.com/wordpress/conf/{$autoconfigkey_decoded['k']}"
+		    );
+		    // We don't need transient, since this will not be used often.
+
+		    if ( !is_wp_error( $result_response ) ) {
+			    $result = wp_remote_retrieve_body( $result_response );
+
+			    if ( !empty( $result ) ) {
+				    $result = json_decode( $result, TRUE );
+
+				    // Set automatic Main settings
+				    if ( !empty( $result['mcp'] ) ) {
+
+					    // Set automatic Player settings
+					    if ( !empty( $result['player'] ) ) {
+						    // this will not overwrite existing options!
+						    add_option( self::player_settings_key,  $result['player'], '', 'no' );
+						    unset( $result['player'] );
+					    }
+					    // set MCP main settings to everything without the player settings
+					    // should include "mcp" and "owners" settings
+					    // You have to delete before add option because there is no upsert support on option store.
+					    delete_option(self::general_settings_key);
+					    add_option( self::general_settings_key, array("mcp_config"=> json_encode($result)), '', 'no' );
+					    
+					    return 1;
+				    } // if not empty mcp_config
+			    }
+		    } // end if erro with retrieval of auto settings
+
+	    } // end if the key had proper parts
+	    
+	    return 0; 
+	}
+	
 	public function get_options( $key = null ) {
 
 		$this->general_settings = (array) get_option( self::general_settings_key );
@@ -555,8 +583,9 @@ class Anvato_Settings {
 		$this->options[self::player_settings_key] = array_merge( array( 'section_player' => 'Player' ), $this->player_settings );
 		$this->options[self::analytics_settings_key] = array_merge( array( 'section_analytics' => 'Analytics' ), $this->analytics_settings );
 		$this->options[self::monetization_settings_key] = array_merge( array( 'section_analytics' => 'Monetization' ), $this->monetization_settings );
-		$this->options[self::general_settings_key ] = array_merge( array( 'section_mcp' => 'Access' ), $this->general_settings );
-
+		$this->options[self::general_settings_key] = array_merge( array( 'section_mcp' => 'Access' ), $this->general_settings );
+		$this->options[self::automatic_setup_key] = (array) get_option( self::automatic_setup_key );
+ 
 		return $key == null ? $this->options : $this->options[$key];
 	}
 
@@ -573,7 +602,6 @@ class Anvato_Settings {
 		$json = json_decode($settings['mcp_config'], TRUE);
 		return $json;
 	}
-
 
 } // end of Anvato_Settings class
 
@@ -620,7 +648,13 @@ class Anvato_Form_Fields {
 			esc_attr( $args['value'] )
 		);
 	}
+	
+	static function reset_check($args) {
 
+		printf (
+			'<input type="checkbox" name="%s" value="1" onclick="if(this.checked) return confirm(\'This will erase all plugin settings. Are you sure?\');" />'
+		, esc_attr( $args['name'] ));
+	}
 }
 
 /**
