@@ -42,14 +42,7 @@ class Anvato_Settings {
 		if (!is_admin()) return;
 
 		// Add the main Anvato Settings page in "Settings"
-		add_action( 'admin_menu', function(){
-			add_options_page( __( 'Anvato', ANVATO_DOMAIN_SLUG ), 
-				__( 'Anvato', ANVATO_DOMAIN_SLUG ), 
-				'manage_options',
-				ANVATO_DOMAIN_SLUG, 
-				array( Anvato_Settings(), 'admin_settings_page_view' ) 
-			);
-		} );
+		add_action( 'admin_menu', array( 'Anvato_Callbacks', '__admin_menu' ) );
 
 		// initiate the fields for the form and saving of the items
 		add_action( 'admin_init', array( $this, 'admin_settings_page_setup' ) );
@@ -57,16 +50,7 @@ class Anvato_Settings {
 		// add settings link in the plugin activation panel, if available
 		if (has_action('plugin_action_links')) {
 
-			add_filter( 'plugin_action_links', function ( $links, $file ) {
-				if( $file === 'wp-anvato-plugin/anvato.php' && function_exists( "admin_url" ) ) {
-					// Insert option for "Settings" before other links for Anvato Plugin
-					array_unshift(
-						$links, 
-						'<a href="' . esc_url(admin_url( 'options-general.php?page=' . ANVATO_DOMAIN_SLUG )) . '">' . __( 'Settings', ANVATO_DOMAIN_SLUG ) . '</a>'
-					);
-				}
-				return $links;
-			}, 10, 2 );
+			add_filter( 'plugin_action_links', array('Anvato_Callbacks','__plugin_action_links'), 10, 2 );
 
 		}
 	}
@@ -99,9 +83,7 @@ class Anvato_Settings {
 			add_settings_section(
 				'section_setup', 
 				__( 'Welcome to Automatic Setup', ANVATO_DOMAIN_SLUG ), 
-				function(){
-					echo "To setup this plugin automatically, please enter your setup key provided by Anvato. If you don't have a setup key, press Manual Setup.";
-				}, 
+				array("Anvato_Callbacks", "__automatic_setup_desc"),  
 				self::automatic_setup_key
 			);
 
@@ -131,9 +113,7 @@ class Anvato_Settings {
 			add_settings_section( 
 				'section_player', 
 				__( 'Player Settings', ANVATO_DOMAIN_SLUG ), 
-				function() {
-					echo '<hr/>';
-				}, 
+				array("Anvato_Callbacks", "__html_line"), 
 				self::player_settings_key 
 			);
 			add_settings_field( 
@@ -187,9 +167,7 @@ class Anvato_Settings {
 			add_settings_section(
 				'section_anvato_analytics', 
 				__( 'Anvato Analytics Settings', ANVATO_DOMAIN_SLUG ), 
-				function() {
-					echo '<hr/>';
-				}, 
+				array("Anvato_Callbacks", "__html_line"), 
 				self::analytics_settings_key
 			);
 				add_settings_field(
@@ -207,9 +185,7 @@ class Anvato_Settings {
 			add_settings_section( 
 				'section_adobe_analytics', 
 				__( 'Adobe Analytics Settings', ANVATO_DOMAIN_SLUG ), 
-				function() {
-					echo '<hr/>';
-				}, 
+				array("Anvato_Callbacks", "__html_line"), 
 				self::analytics_settings_key
 			);
 				add_settings_field( 
@@ -249,9 +225,7 @@ class Anvato_Settings {
 			add_settings_section( 
 				'section_heartbeet_analytics', 
 				__( 'Heartbeat Analytics Settings', ANVATO_DOMAIN_SLUG ), 
-				function() {
-					echo '<hr/>';
-				}, 
+				array("Anvato_Callbacks", "__html_line"), 
 				self::analytics_settings_key
 			);
 				add_settings_field( 
@@ -313,9 +287,7 @@ class Anvato_Settings {
 			add_settings_section( 
 				'section_comscore_analytics', 
 				__( 'Comscore Analytics Settings', ANVATO_DOMAIN_SLUG ), 
-				function() {
-					echo '<hr/>';
-				}, 
+				array("Anvato_Callbacks", "__html_line"), 
 				self::analytics_settings_key
 			);
 				add_settings_field( 
@@ -342,9 +314,7 @@ class Anvato_Settings {
 			add_settings_section( 
 				'section_monetization', 
 				__( 'Monetization Settings', ANVATO_DOMAIN_SLUG ), 
-				function() {
-					echo '<hr/>';
-				}, 
+				array("Anvato_Callbacks", "__html_line"), 
 				self::monetization_settings_key 
 			);
 				add_settings_field( 
@@ -384,9 +354,7 @@ class Anvato_Settings {
 			add_settings_section(
 				'section_mcp', 
 				__( 'MCP Settings', ANVATO_DOMAIN_SLUG ), 
-				function(){
-					echo '<hr/>';
-				}, 
+				array("Anvato_Callbacks", "__html_line"), 
 				self::general_settings_key
 			);
 				add_settings_field( 
@@ -605,8 +573,6 @@ class Anvato_Settings {
 
 } // end of Anvato_Settings class
 
-
-
 /**
  * Object to store and manage form-field items for Anvato Settings page
  */
@@ -657,6 +623,48 @@ class Anvato_Form_Fields {
 	}
 }
 
+/**
+ * There is no support for anonymous functions on PHP 5.2.4+ hence all anonymous 
+ * functions was collected in this class.
+ * see more for WP requirements : https://wordpress.org/about/requirements/
+ */
+
+class Anvato_Callbacks
+{
+    
+    static function __admin_menu ()
+    {
+	    add_options_page( __( 'Anvato', ANVATO_DOMAIN_SLUG ), 
+		    __( 'Anvato', ANVATO_DOMAIN_SLUG ), 
+		    'manage_options',
+		    ANVATO_DOMAIN_SLUG, 
+		    array( Anvato_Settings(), 'admin_settings_page_view' ) 
+	    );
+    }
+    
+    static function __plugin_action_links ( $links, $file ) 
+    {
+	    if( $file === 'wp-anvato-plugin/anvato.php' && function_exists( "admin_url" ) ) {
+		    // Insert option for "Settings" before other links for Anvato Plugin
+		    array_unshift(
+			    $links, 
+			    '<a href="' . esc_url(admin_url( 'options-general.php?page=' . ANVATO_DOMAIN_SLUG )) . '">' . __( 'Settings', ANVATO_DOMAIN_SLUG ) . '</a>'
+		    );
+	    }
+	    return $links;
+    }
+    
+    static function __automatic_setup_desc ()
+    {
+	    echo "To setup this plugin automatically, please enter your setup key provided by Anvato. If you don't have a setup key, press Manual Setup.";
+    }
+    
+    static function __html_line ()
+    {
+	    echo '<hr/>';
+    }
+    
+}
 /**
  * Get handle for Anvato Settings class
  *
