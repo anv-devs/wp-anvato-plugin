@@ -100,15 +100,19 @@ class Anvato_Library {
 	 */
 	private function build_request_params( $args = array() ) {
 		$params = array();
-		foreach( $args as $key => $value ) {
-			switch ( $key ) {
-				case 'lk' :
-					$params['filter_by'][] = 'name';
-					$params['filter_cond'][] = 'lk';
-					$params['filter_value'][] = sanitize_text_field( $value );
-				break;
-			}
+
+		if (array_key_exists('lk', $args)) {
+			// Special case for "LK", whatever that means
+			$params = array(
+				'filter_by' => array( 'name' ),
+				'filter_cond' => array( 'lk' ),
+				'filter_value' => array( sanitize_text_field( $args['lk'] ) ),
+			);
+		} else {
+			// Generic case - assume the proper terms are passed and use them with API
+			$params = $args;
 		}
+
 		return $params;
 	}
 
