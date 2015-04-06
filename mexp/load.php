@@ -34,7 +34,7 @@ if (is_admin()) {
 	 * @param array $services Associative array of Media Explorer services to load.
 	 * @return array $services Services to load, including Anvato one.
 	 */
-	add_filter('mexp_services', anvato_mexp_services);
+	add_filter('mexp_services', "anvato_mexp_services");
         function anvato_mexp_services(array $services) {
 
 		/*
