@@ -97,7 +97,10 @@ function anvato_shortcode($attr)
 
     $format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
 
-    return sprintf($format, esc_attr($json['pInstance']), esc_attr(json_encode($json)), esc_url($player_url)
+    return sprintf($format, 
+            esc_attr($json['pInstance']), 
+            esc_attr(json_encode($json)), 
+            esc_url($player_url)
     );
 }
 
