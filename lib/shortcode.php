@@ -19,12 +19,12 @@ function anvato_shortcode($attr)
 
     // Set the attributes which the shortcode can override
     $json = shortcode_atts(array(
-        'mcp' => $mcp['mcp']['id'],
-        'width' => $player['width'],
-        'height' => $player['height'],
-        'video' => null,
-        'autoplay' => false
-            ), $attr, 'anvplayer');
+	    'mcp' => $mcp['mcp']['id'],
+	    'width' => $player['width'],
+	    'height' => $player['height'],
+	    'video' => null,
+	    'autoplay' => false
+	), $attr, 'anvplayer');
 
     $video_ids = explode(",", $json["video"]);
     if (sizeof($video_ids) > 1) {
