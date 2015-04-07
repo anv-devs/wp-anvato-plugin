@@ -318,7 +318,6 @@ class Anvato_Settings
 		// if its not array, make it into one
 		if ( !is_array($dirty) ) {
 			$dirty = (array) $dirty;
-		}
 		$clean = array_map('sanitize_text_field', $dirty);
 
 		if ( array_key_exists( 'mcp_config_automatic_key', $clean ) ) 
