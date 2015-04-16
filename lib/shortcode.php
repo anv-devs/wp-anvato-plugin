@@ -1,4 +1,5 @@
 <?php
+
 global $anvato_player_index;
 $anvato_player_index = 0;
 
@@ -8,128 +9,99 @@ $anvato_player_index = 0;
  * @param  array $attr Array of shortcode attributes
  * @return string       HTML to replace the shortcode
  */
-function anvato_shortcode( $attr ) {
-	global $anvato_player_index;
-	$mcp = Anvato_Settings()->get_mcp_options();
-	$player = Anvato_Settings()->get_options(Anvato_Settings::player_settings_key);
-	$analytics = Anvato_Settings()->get_options(Anvato_Settings::analytics_settings_key);
-	$monetization = Anvato_Settings()->get_options(Anvato_Settings::monetization_settings_key);
+function anvato_shortcode($attr)
+{
+    global $anvato_player_index;
+    $mcp = Anvato_Settings()->get_mcp_options();
+    $player = Anvato_Settings()->get_options(Anvato_Settings::PLAYER_SETTINGS_KEY);
+    $analytics = Anvato_Settings()->get_options(Anvato_Settings::ANALYTICS_SETTINGS_KEY);
+    $monetization = Anvato_Settings()->get_options(Anvato_Settings::MONETIZATION_SETTINGS_KEY);
 
-	# Set the attributes which the shortcode can override
-	$json = shortcode_atts( array(
-		'mcp'        => $mcp['mcp']['id'],
-		'width'      => $player['width'],
-		'height'     => $player['height'],
-		'video'      => null,
-		'autoplay'   => false
-	), $attr, 'anvplayer' );
+    // Set the attributes which the shortcode can override
+    $json = shortcode_atts(array(
+	    'mcp' => $mcp['mcp']['id'],
+	    'width' => $player['width'],
+	    'height' => $player['height'],
+	    'video' => null,
+	    'autoplay' => false
+	), $attr, 'anvplayer');
 
-	# Set other attributes that can't be overridden
-	$json['pInstance'] = 'p' . $anvato_player_index++;
+    $video_ids = explode(",", $json["video"]);
+    if (sizeof($video_ids) > 1) {
+        unset($json["video"]);
+        $json["playlist"] = $video_ids;
+    }
+    elseif (!empty($attr['playlist'])) {
+        unset($json["video"]);
+        $json["playlist"] = $attr['playlist'];
+    }
 
-	# Set the player URL, which isn't part of the JSON but can be overridden
-	$player_url = ! empty( $attr['player_url'] ) ? $attr['player_url'] : $player['player_url'];
+    if (!empty($mcp['mcp']['tkx_key'])) {
+        $json['config']['accessKey'] = $mcp['mcp']['tkx_key'];
+        $json['config']['accessControl']['preview'] = false;
+    }
 
-	# Set the DFP Ad Tag, which can also be overridden
-	if ( empty($monetization['advanced_targeting']) && ! empty( $monetization['adtag'] ) && ( ! isset( $attr['plugin_dfp_adtagurl'] ) || ( empty( $attr['plugin_dfp_adtagurl'] ) && $attr['plugin_dfp_adtagurl'] !== 'false' ) ) ) {
-		$json['plugins']['dfp'] = array( 'adTagUrl' => $monetization['adtag'] );
-	} elseif ( ! empty( $attr['plugin_dfp_adtagurl'] ) && $attr['plugin_dfp_adtagurl'] !== 'false' ) {
-		$json['plugins']['dfp'] = array( 'adTagUrl' => urldecode($attr['plugin_dfp_adtagurl']) );
-	} elseif ( !empty($monetization['advanced_targeting']) ) {
-                $json['plugins']['dfp'] = json_decode($monetization['advanced_targeting'], true );
+    $json['autoplay'] = ( 'true' == $json['autoplay'] );
+
+    $json['pInstance'] = 'p' . $anvato_player_index++;
+
+    // Set the player URL, which isn't part of the JSON but can be overridden
+    $player_url = !empty($attr['player_url']) ? $attr['player_url'] : $player['player_url'];
+
+    // Avaliable values 
+    $plugin_map = array(
+        "analytics" => array(
+            "pdb" => "tracker_id",
+        ),
+        "omniture" => array(
+            "account" => "adobe_account",
+            "trackingServer" => "adobe_trackingserver"
+        ),
+        "heartbeat" => array(
+            'account' => 'heartbeat_account_id',
+            'publisherId' => 'heartbeat_publisher_id',
+            'jobId' => 'heartbeat_job_id',
+            'marketingCloudId' => 'heartbeat_marketing_id',
+            'trackingServer' => 'heartbeat_tracking_server',
+            'customTrackingServer' => 'heartbeat_cstm_tracking_server',
+        ),
+        "comscore" => array(
+            'clientId' => 'comscore_client_id'
+        )
+    );
+
+    foreach ($plugin_map as $name => $plugin) {
+        foreach ($plugin as $field => $var) {
+            if (!empty($analytics[$var])) {
+                $json['plugins'][$name][$field] = $analytics[$var];
+            }
         }
-	
-	# Set the Tracker ID, which can be overridden
-	if ( ! isset( $attr['tracker_id'] ) && ! empty( $analytics['tracker_id'] ) ) {
-		$json['plugins']['analytics'] = array( 'pdb' => $analytics['tracker_id'] );
-	} elseif ( isset( $attr['tracker_id'] ) && 'false' !== $attr['tracker_id'] ) {
-		$json['plugins']['analytics'] = array( 'pdb' => $attr['tracker_id'] );
-	}
+    }
 
-	# Set the Adobe Analytics information, which can be overridden or canceled
-	if ( ! isset( $attr['adobe_analytics'] ) || ( isset( $attr['adobe_analytics'] ) && 'false' != $attr['adobe_analytics'] ) ) {
-		if ( ! isset( $attr['adobe_profile'] ) && ! empty( $analytics['adobe_profile'] ) ) {
-			$json['plugins']['omniture']['profile'] = $analytics['adobe_profile'];
-		} elseif ( isset( $attr['adobe_profile'] ) && 'false' !== $attr['adobe_profile'] ) {
-			$json['plugins']['omniture']['profile'] = $attr['adobe_profile'];
-		}
-
-		if ( ! isset( $attr['adobe_account'] ) && ! empty( $analytics['adobe_account'] ) ) {
-			$json['plugins']['omniture']['account'] = $analytics['adobe_account'];
-		} elseif ( isset( $attr['adobe_account'] ) && 'false' !== $attr['adobe_account'] ) {
-			$json['plugins']['omniture']['account'] = $attr['adobe_account'];
-		}
-
-		if ( ! isset( $attr['adobe_trackingserver'] ) && ! empty( $analytics['adobe_trackingserver'] ) ) {
-			$json['plugins']['omniture']['trackingServer'] = $analytics['adobe_trackingserver'];
-		} elseif ( isset( $attr['adobe_trackingserver'] ) && 'false' !== $attr['adobe_trackingserver'] ) {
-			$json['plugins']['omniture']['trackingServer'] = $attr['adobe_trackingserver'];
-		}
-	}
-
-        # Set Heartbeat 
-        if ( ! isset( $attr['heartbeat_account_id'] ) && ! empty( $analytics['heartbeat_account_id'] ) ) {
-		$json['plugins']['heartbeat'] = array( 'account' => $analytics['heartbeat_account_id'] );
-	} elseif ( isset( $attr['heartbeat_account_id'] ) && 'false' !== $attr['heartbeat_account_id'] ) {
-		$json['plugins']['heartbeat'] = array( 'account' => $attr['heartbeat_account_id'] );
-	}
-        
-        if ( ! isset( $attr['heartbeat_publisher_id'] ) && ! empty( $analytics['heartbeat_publisher_id'] ) ) {
-		$json['plugins']['heartbeat'] = array( 'publisherId' => $analytics['heartbeat_publisher_id'] );
-	} elseif ( isset( $attr['heartbeat_publisher_id'] ) && 'false' !== $attr['heartbeat_publisher_id'] ) {
-		$json['plugins']['heartbeat'] = array( 'publisherId' => $attr['heartbeat_publisher_id'] );
-	}
-        
-        if ( ! isset( $attr['heartbeat_job_id'] ) && ! empty( $analytics['heartbeat_job_id'] ) ) {
-		$json['plugins']['heartbeat'] = array( 'jobId' => $analytics['heartbeat_job_id'] );
-	} elseif ( isset( $attr['heartbeat_job_id'] ) && 'false' !== $attr['heartbeat_job_id'] ) {
-		$json['plugins']['heartbeat'] = array( 'jobId' => $attr['heartbeat_job_id'] );
-	}
-        
-        if ( ! isset( $attr['heartbeat_marketing_id'] ) && ! empty( $analytics['heartbeat_marketing_id'] ) ) {
-		$json['plugins']['heartbeat'] = array( 'marketingCloudId' => $analytics['heartbeat_marketing_id'] );
-	} elseif ( isset( $attr['heartbeat_marketing_id'] ) && 'false' !== $attr['heartbeat_marketing_id'] ) {
-		$json['plugins']['heartbeat'] = array( 'marketingCloudId' => $attr['heartbeat_marketing_id'] );
-	}
-        
-        if ( ! isset( $attr['heartbeat_tracking_server'] ) && ! empty( $analytics['heartbeat_tracking_server'] ) ) {
-		$json['plugins']['heartbeat'] = array( 'trackingServer' => $analytics['heartbeat_tracking_server'] );
-	} elseif ( isset( $attr['heartbeat_tracking_server'] ) && 'false' !== $attr['heartbeat_tracking_server'] ) {
-		$json['plugins']['heartbeat'] = array( 'trackingServer' => $attr['heartbeat_tracking_server'] );
-	}
-        
-        # Set Comscore Ids
-        if ( ! isset( $attr['comscore_client_id'] ) && ! empty( $analytics['comscore_client_id'] ) ) {
-		$json['plugins']['comscore'] = array( 'clientId' => $analytics['comscore_client_id'] );
-	} elseif ( isset( $attr['comscore_client_id'] ) && 'false' !== $attr['comscore_client_id'] ) {
-		$json['plugins']['comscore'] = array( 'clientId' => $attr['comscore_client_id'] );
-	}
-        
-        
-        $video_ids = explode(",", $json["video"]);
-	if ( sizeof($video_ids) > 1 )
-	{
-		unset($json["video"]);
-		$json["playlist"] = $video_ids;
-	}
-        elseif( isset($attr['playlist']) )
-        {
-                unset($json["video"]);
-		$json["playlist"] = $attr['playlist'];
+    // Set the DFP Ad Tag, which can also be overridden
+    if (!empty($monetization['advanced_targeting'])) {
+        $json['plugins']['dfp'] = json_decode($monetization['advanced_targeting'], true);
+    }
+    else {
+        // User can close or change own dfp in shortcode
+        if (!empty($attr['plugin_dfp_adtagurl']) && $attr['plugin_dfp_adtagurl'] !== 'false') {
+            $json['plugins']['dfp']['adTagUrl'] = urldecode($attr['plugin_dfp_adtagurl']);
         }
-
-        if ( isset($mcp['mcp']['tkx_key']) )
-        {
-            $json['config']['accessKey'] = $mcp['mcp']['tkx_key'];
-            $json['config']['accessControl']['preview'] = false;
+        elseif (!empty($monetization['adtag'])) {
+            $json['plugins']['dfp']['adTagUrl'] = $monetization['adtag'];
         }
-        
-	# Clean up attributes as need be
-	$json['autoplay'] = ( 'true' == $json['autoplay'] );
+    }
 
-	# Allow theme/plugins to filter the JSON before outputting
-	$json = apply_filters( 'anvato_anvp_json', $json, $attr );
+    # Allow theme/plugins to filter the JSON before outputting
+    $json = apply_filters('anvato_anvp_json', $json, $attr);
 
-	return "<div id='" . esc_attr( $json['pInstance'] ) . "'></div><script data-anvp='" . esc_attr( json_encode( $json ) ) . "' src='" . esc_url( $player_url ) . "'></script>";
+    $format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
+
+    return sprintf($format, 
+            esc_attr($json['pInstance']), 
+            esc_attr(json_encode($json)), 
+            esc_url($player_url)
+    );
 }
-add_shortcode( 'anvplayer', 'anvato_shortcode' );
+
+add_shortcode('anvplayer', 'anvato_shortcode');
