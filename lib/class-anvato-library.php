@@ -303,42 +303,42 @@ class Anvato_Library {
    
     }
 
-	/**
-	 * Request categories
-	 *
-	 * @see  $this->build_request_parameters() for allowed search parameters
-	 *
-	 * @param  array $args Search parameters: page number and page size
-	 * @return xml|WP_Error array of SimpleXMLElements or WP_Error on failure
-	 */
-	public function get_categories( $args = array() ) {
-		$api_method = "list_categories";
+    /**
+     * Request categories
+     *
+     * @see  $this->build_request_parameters() for allowed search parameters
+     *
+     * @param  array $args Search parameters: page number and page size
+     * @return xml|WP_Error array of SimpleXMLElements or WP_Error on failure
+     */
+    public function get_categories( $args = array() ) {
+        $api_method = "list_categories";
 
-		if ( $args['station'] === '' ) {
-			return new WP_Error( 'missing_required_settings', __( 'Please select station.', ANVATO_DOMAIN_SLUG  ) );
-		}
+        if ( $args['station'] === '' ) {
+            return new WP_Error( 'missing_required_settings', __( 'Please select station.', ANVATO_DOMAIN_SLUG  ) );
+        }
 
-		foreach ( $this->general_settings['owners'] as $ow_item ) {
-			if( $args['station'] === $ow_item['id'] ) {
-				$this->selected_station = $ow_item;
-				break;
-			}
-		}
+        foreach ( $this->general_settings['owners'] as $ow_item ) {
+            if( $args['station'] === $ow_item['id'] ) {
+                $this->selected_station = $ow_item;
+                break;
+            }
+        }
 
-		$this->xml_body = str_replace("%API_METHOD%", $api_method, $this->xml_body );
+        $this->xml_body = str_replace("%API_METHOD%", $api_method, $this->xml_body );
 
-		$response = $this->request( $this->build_request_params( $args ) );
-		if ( is_wp_error( $response ) ) {
-			return $response;
-		} else {
-			$xml = simplexml_load_string( wp_remote_retrieve_body( $response ) );
-			if ( is_object( $xml ) ) {
-				return $xml;
-			} else {
-				return new WP_Error( 'parse_error', __( 'There was an error processing the search results.', ANVATO_DOMAIN_SLUG  ) );
-			}
-		}
-	}
+        $response = $this->request( $this->build_request_params( $args ) );
+        if ( is_wp_error( $response ) ) {
+            return $response;
+        } else {
+            $xml = simplexml_load_string( wp_remote_retrieve_body( $response ) );
+            if ( is_object( $xml ) ) {
+                return $xml;
+            } else {
+                return new WP_Error( 'parse_error', __( 'There was an error processing the search results.', ANVATO_DOMAIN_SLUG  ) );
+            }
+        }
+    }
 }
 
 /**
