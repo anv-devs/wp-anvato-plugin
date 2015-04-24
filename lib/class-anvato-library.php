@@ -98,29 +98,6 @@ class Anvato_Library {
         return base64_encode(hash_hmac('sha256', $this->xml_body . $time, $this->selected_station['private_key'], true));
     }
 
-    /**
-     * Set up the filtering conditions to use as part of a search of the library.
-     *
-     * @param array $args {
-     * 		@type string $lk Search keyword.
-     * }
-     * @return array.
-     */
-    private function build_request_params($args = array()) 
-    {
-        $params = array();
-        foreach ($args as $key => $value) {
-            switch ($key) {
-                case 'lk' :
-                    $params['filter_by'][] = 'name';
-                    $params['filter_cond'][] = 'lk';
-                    $params['filter_value'][] = sanitize_text_field($value);
-                    break;
-            }
-        }
-        return $params;
-    }
-
 	/**
 	 * Set up the filtering conditions to use as part of a search of the library.
 	 *
