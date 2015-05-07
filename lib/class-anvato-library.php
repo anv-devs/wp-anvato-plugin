@@ -235,55 +235,92 @@ class Anvato_Library {
 	 * @param  array $args Search parameters.
 	 * @return array|WP_Error Array with SimpleXMLElements of any videos found, or WP_Error on failure.
 	 */
-	public function search($args = array()) 
-	{
-		if ( empty($args['station']) )
-		{
-				return new WP_Error('missing_required_settings', __('Please select station.', ANVATO_DOMAIN_SLUG));
+	public function search( $args = array() ) {
+
+		// check validity of "station" argument provided in $args
+		if ( empty( $args['station'] ) ) {
+			return new WP_Error(
+				'missing_required_settings', 
+				__('Please select station.', ANVATO_DOMAIN_SLUG)
+			);
 		}
 
-		if ( empty($this->api_methods[$args['type']]) ) 
-		{
-				return new WP_Error('missing_required_settings', __('Unknow API call.', ANVATO_DOMAIN_SLUG));
+		// check validity of "type" argument provided in $args
+		// and if it is an alloved type of methods
+		if ( empty($args['type']) || !array_key_exists($args['type'], $this->api_methods) ) {
+			return new WP_Error(
+				'missing_required_settings',
+				__('Unknow API call.', ANVATO_DOMAIN_SLUG)
+			);
+		} else {
+			// set the Anvato API method name, per type provided
+			$api_method = $this->api_methods[$args['type']];
+
+			// and declare proper XML request body
+			$this->xml_body = str_replace("%API_METHOD%", $api_method, $this->xml_body);
 		}
-  
-		$api_method = $this->api_methods[$args['type']];
 		
-		foreach ( $this->general_settings['owners'] as $ow_item ) 
-		{
-			if ($args['station'] === $ow_item['id']) 
-			{
-				$this->selected_station = $ow_item;
+		/*
+			prepare "selected_station" parameter from "owners" settings
+			and find the one provied through $args
+
+			This is done from sitewide settings, not query level!
+		*/
+		foreach ( $this->general_settings['owners'] as $owner ) {
+			if ( $args['station'] === $owner['id'] ) {
+				$this->selected_station = $owner;
 				break;
 			}
 		}
 
-		$this->xml_body = str_replace("%API_METHOD%", $api_method, $this->xml_body);
+		// Prepare the parameters and make the request
+		$request_parameters = $this->build_request_params( $args );
+		$raw_response = $this->request( $request_parameters );
+		if ( is_wp_error( $raw_response ) ) {
+			return $raw_response;
+		}
+		
+		// Parse received XML
+		$xml = simplexml_load_string( wp_remote_retrieve_body( $raw_response ) );
+		if ( !is_object( $xml ) ) {
+			return new WP_Error(
+				'parse_error',
+				__('There was an error processing the search results.', ANVATO_DOMAIN_SLUG)
+			);
+		}
 
-		$response = $this->request($this->build_request_params($args));
-		if (is_wp_error($response)) 
-		{
-				return $response;
-		}
-				
-		$xml = simplexml_load_string(wp_remote_retrieve_body($response));
-		if ( !is_object($xml) ) 
-		{
-				return new WP_Error('parse_error', __('There was an error processing the search results.', ANVATO_DOMAIN_SLUG));
+		// generate proper return
+
+		/*
+			In case the method node is not setup and selected in Switch below
+			something would be return to notify that this method needs to be declared
+		*/
+		$clean_return = new WP_Error(
+			'parse_error',
+			__('Unknown method node return type.', ANVATO_DOMAIN_SLUG)
+		);
+
+		switch ($api_method) {
+
+			case 'list_categories':
+				$clean_return = $xml->params->category_list->xpath("//category");
+				break;
+
+			case 'list_embeddable_channels':
+				$clean_return = $xml->params->video_list->xpath("//channel");
+				break;
+
+			case 'list_playlists':
+				$clean_return = $xml->params->video_list->xpath("//playlist");
+				break;
+
+			case 'list_videos':
+				$clean_return = $xml->params->channel_list->xpath("//video");
+				break;
+
 		}
 
-		if ($api_method === 'list_videos') 
-		{
-				return $xml->params->video_list->xpath("//video");
-		}
-		else if ($api_method === 'list_playlists') 
-		{
-				return $xml->params->video_list->xpath("//playlist");
-		}
-		else if ($api_method === 'list_embeddable_channels') 
-		{
-				return $xml->params->channel_list->xpath("//channel");
-		}
+		return $clean_return;
    
 	}
 
