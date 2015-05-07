@@ -24,6 +24,7 @@ class Anvato_Library {
 	*	These are used in "search" method in this module
 	*/
 	private $api_methods = array(
+		'categories' => 'list_categories',
 		'live' => 'list_embeddable_channels',
 		'playlist' => 'list_playlists',
 		'vod' => 'list_videos',
