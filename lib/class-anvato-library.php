@@ -20,9 +20,9 @@ class Anvato_Library {
 	private $api_request_url = '%s/api?ts=%d&sgn=%s&id=%s&%s';
 
 	/**
-	* Allowed API calls
-	*	These are used in "search" method in this module
-	*/
+	 * Allowed API calls
+	 *	These are used in "search" method in this module
+	 */
 	private $api_methods = array(
 		'categories' => 'list_categories',
 		'live' => 'list_embeddable_channels',
