@@ -119,8 +119,8 @@ class Anvato_Library {
 	private function build_request_params( $args = array() ) {
 		$params = array();
 
+		// Special case for "LK" for video "like" lookup
 		if (array_key_exists('lk', $args)) {
-			// Special case for "LK", whatever that means
 			$params = array(
 				'filter_by' => array( 'name' ),
 				'filter_cond' => array( 'lk' ),
