@@ -21,8 +21,14 @@ class Anvato_Library {
 
 	/**
 	* Allowed API calls
+	*	These are used in "search" method in this module
 	*/
-	private $api_methods = array('live' => 'list_embeddable_channels', 'vod' => 'list_videos', 'playlist' => 'list_playlists');
+	private $api_methods = array(
+		'live' => 'list_embeddable_channels',
+		'playlist' => 'list_playlists',
+		'vod' => 'list_videos',
+	);
+
 	/**
 	 * The value of the plugin settings on instantiation.
 	 *
