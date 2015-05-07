@@ -218,6 +218,7 @@ class Anvato_Settings
 
 		// Set automatic Player settings
 		// this will not overwrite existing options!
+      delete_option(self::PLAYER_SETTINGS_KEY);
 		add_option(self::PLAYER_SETTINGS_KEY, $result['player'], '', 'no');
 		unset($result['player']);
 
@@ -315,6 +316,7 @@ class Anvato_Settings
 			unset($clean['mcp_config_automatic_key']);
 		    }
 
+		    delete_option(self::AUTOMATIC_SETUP_KEY);
 		    add_option(self::AUTOMATIC_SETUP_KEY, $result, '', 'no');
 
 		    // and then we want to get out of the process altogether and not create a DB item
