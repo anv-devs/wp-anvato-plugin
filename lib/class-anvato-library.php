@@ -147,12 +147,12 @@ class Anvato_Library {
 	 */
 	private function build_request_url( $params = array(), $time ) {
 		return sprintf(
-				$this->api_request_url, 
-				$this->general_settings['mcp']['url'],
-				$time, 
-				urlencode( $this->build_request_signature( $time ) ), 
-				$this->selected_station['public_key'], 
-				build_query( $params )
+			$this->api_request_url, 
+			$this->general_settings['mcp']['url'],
+			$time, 
+			urlencode( $this->build_request_signature( $time ) ), 
+			$this->selected_station['public_key'], 
+			build_query( $params )
 		);
 	}
 
@@ -223,13 +223,13 @@ class Anvato_Library {
 			return $response;
 		} else if (wp_remote_retrieve_response_code( $response ) === 200) {
 			if ( $this->is_api_error( $response ) ) {
-					return new WP_Error(
-						'api_error', 
-						sprintf(
-							__( 'Anvato responded with an error (%s).', ANVATO_DOMAIN_SLUG ), 
-							$this->get_api_error( $response )
-						)
-					);
+				return new WP_Error(
+					'api_error', 
+					sprintf(
+						__( 'Anvato responded with an error (%s).', ANVATO_DOMAIN_SLUG ), 
+						$this->get_api_error( $response )
+					)
+				);
 			}
 
 			return $response;
