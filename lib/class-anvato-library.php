@@ -242,7 +242,7 @@ class Anvato_Library {
 		if ( empty( $args['station'] ) ) {
 			return new WP_Error(
 				'missing_required_settings', 
-				__('Please select station.', ANVATO_DOMAIN_SLUG)
+				__( 'Please select station.', ANVATO_DOMAIN_SLUG )
 			);
 		}
 
@@ -251,16 +251,16 @@ class Anvato_Library {
 		if ( empty($args['type']) || !array_key_exists($args['type'], $this->api_methods) ) {
 			return new WP_Error(
 				'missing_required_settings',
-				__('Unknow API call.', ANVATO_DOMAIN_SLUG)
+				__( 'Unknow API call.', ANVATO_DOMAIN_SLUG )
 			);
 		} else {
 			// set the Anvato API method name, per type provided
 			$api_method = $this->api_methods[$args['type']];
 
 			// and declare proper XML request body
-			$this->xml_body = str_replace("%API_METHOD%", $api_method, $this->xml_body);
+			$this->xml_body = str_replace( "%API_METHOD%", $api_method, $this->xml_body );
 		}
-		
+
 		/*
 			prepare "selected_station" parameter from "owners" settings
 			and find the one provied through $args
@@ -280,13 +280,13 @@ class Anvato_Library {
 		if ( is_wp_error( $raw_response ) ) {
 			return $raw_response;
 		}
-		
+
 		// Parse received XML
 		$xml = simplexml_load_string( wp_remote_retrieve_body( $raw_response ) );
 		if ( !is_object( $xml ) ) {
 			return new WP_Error(
 				'parse_error',
-				__('There was an error processing the search results.', ANVATO_DOMAIN_SLUG)
+				__( 'There was an error processing the search results.', ANVATO_DOMAIN_SLUG )
 			);
 		}
 
@@ -294,7 +294,6 @@ class Anvato_Library {
 
 		if ( $output_type === 'xml' ) {
 			/*
-
 				Return "raw XML", which this kind of out put is requested.
 
 				This is handy to use when the FULL list of parameters is necessary
@@ -302,42 +301,42 @@ class Anvato_Library {
 
 				This is also a decent solution for when the API return block 
 				is not setup to return clean yet
-
 			*/
+
 			$clean_return = $xml->params;
 		} else {
 			/*
 				In case the method node is not setup and selected in Switch below
 				something would be return to notify that this method needs to be declared
 			*/
+
 			$clean_return = new WP_Error(
 				'parse_error',
-				__('Unknown method node return type.', ANVATO_DOMAIN_SLUG)
+				__( 'Unknown method node return type.', ANVATO_DOMAIN_SLUG )
 			);
 
-			switch ($api_method) {
+			switch ( $api_method ) {
 
 				case 'list_categories':
-					$clean_return = $xml->params->category_list->xpath("//category");
+					$clean_return = $xml->params->category_list->xpath( "//category" );
 					break;
 
 				case 'list_embeddable_channels':
-					$clean_return = $xml->params->video_list->xpath("//channel");
+					$clean_return = $xml->params->video_list->xpath( "//channel" );
 					break;
 
 				case 'list_playlists':
-					$clean_return = $xml->params->video_list->xpath("//playlist");
+					$clean_return = $xml->params->video_list->xpath( "//playlist" );
 					break;
 
 				case 'list_videos':
-					$clean_return = $xml->params->channel_list->xpath("//video");
+					$clean_return = $xml->params->channel_list->xpath( "//video" );
 					break;
 
 			}
 		}
 
 		return $clean_return;
-   
 	}
 
 }
