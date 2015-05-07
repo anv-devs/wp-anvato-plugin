@@ -31,6 +31,18 @@ class Anvato_Library {
 	);
 
 	/**
+	 * Allowed API parameters
+	 *	These are used in "build_request_params" method in this module
+	 *	they are used to filter out only allowed parameters!
+	 */
+	private $api_parameters = array(
+		// alphabetized
+		'page_no',
+		'station',
+		'type',
+	);
+
+	/**
 	 * The value of the plugin settings on instantiation.
 	 *
 	 * @var array.
@@ -119,16 +131,23 @@ class Anvato_Library {
 	private function build_request_params( $args = array() ) {
 		$params = array();
 
-		// Special case for "LK" for video "like" lookup
-		if (array_key_exists('lk', $args)) {
-			$params = array(
-				'filter_by' => array( 'name' ),
-				'filter_cond' => array( 'lk' ),
-				'filter_value' => array( sanitize_text_field( $args['lk'] ) ),
-			);
-		} else {
-			// Generic case - assume the proper terms are passed and use them with API
-			$params = $args;
+		if ( !empty( $args ) ) {
+
+			// Special case for "LK" for video "like" lookup
+			if ( array_key_exists('lk', $args) ) {
+				$params = array(
+					'filter_by' => array( 'name' ),
+					'filter_cond' => array( 'lk' ),
+					'filter_value' => array( sanitize_text_field( $args['lk'] ) ),
+				);
+			} else {
+				// Generic case - clean the parameters by filtering in the allowed params
+				$params = array_intersect_key(
+					$args,
+					array_flip( $this->api_parameters )
+				);
+			}
+
 		}
 
 		return $params;
