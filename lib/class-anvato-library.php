@@ -233,9 +233,10 @@ class Anvato_Library {
 	 * @see  $this->build_request_parameters() for allowed search parameters.
 	 *
 	 * @param  array $args Search parameters.
+	 * @param  string $output_type Type of ourpur expected: "clean" or "xml"
 	 * @return array|WP_Error Array with SimpleXMLElements of any videos found, or WP_Error on failure.
 	 */
-	public function search( $args = array() ) {
+	public function search( $args = array(), $output_type = 'clean' ) {
 
 		// check validity of "station" argument provided in $args
 		if ( empty( $args['station'] ) ) {
@@ -291,33 +292,48 @@ class Anvato_Library {
 
 		// generate proper return
 
-		/*
-			In case the method node is not setup and selected in Switch below
-			something would be return to notify that this method needs to be declared
-		*/
-		$clean_return = new WP_Error(
-			'parse_error',
-			__('Unknown method node return type.', ANVATO_DOMAIN_SLUG)
-		);
+		if ( $output_type === 'xml' ) {
+			/*
 
-		switch ($api_method) {
+				Return "raw XML", which this kind of out put is requested.
 
-			case 'list_categories':
-				$clean_return = $xml->params->category_list->xpath("//category");
-				break;
+				This is handy to use when the FULL list of parameters is necessary
+				Parameter "total_items", "num_pages", "page_sz" for example.
 
-			case 'list_embeddable_channels':
-				$clean_return = $xml->params->video_list->xpath("//channel");
-				break;
+				This is also a decent solution for when the API return block 
+				is not setup to return clean yet
 
-			case 'list_playlists':
-				$clean_return = $xml->params->video_list->xpath("//playlist");
-				break;
+			*/
+			$clean_return = $xml->params;
+		} else {
+			/*
+				In case the method node is not setup and selected in Switch below
+				something would be return to notify that this method needs to be declared
+			*/
+			$clean_return = new WP_Error(
+				'parse_error',
+				__('Unknown method node return type.', ANVATO_DOMAIN_SLUG)
+			);
 
-			case 'list_videos':
-				$clean_return = $xml->params->channel_list->xpath("//video");
-				break;
+			switch ($api_method) {
 
+				case 'list_categories':
+					$clean_return = $xml->params->category_list->xpath("//category");
+					break;
+
+				case 'list_embeddable_channels':
+					$clean_return = $xml->params->video_list->xpath("//channel");
+					break;
+
+				case 'list_playlists':
+					$clean_return = $xml->params->video_list->xpath("//playlist");
+					break;
+
+				case 'list_videos':
+					$clean_return = $xml->params->channel_list->xpath("//video");
+					break;
+
+			}
 		}
 
 		return $clean_return;
