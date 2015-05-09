@@ -3,14 +3,16 @@
 /**
  * Anvato service for Media Explorer.
  */
-class MEXP_Anvato_Service extends MEXP_Service {
+class MEXP_Anvato_Service extends MEXP_Service
+{
 
 	/**
 	 * Constructor.
 	 *
 	 * Creates the Backbone view template.
 	 */
-	public function __construct() {
+	public function __construct()
+	{
 		$this->set_template(new MEXP_Anvato_Template);
 	}
 
@@ -19,11 +21,17 @@ class MEXP_Anvato_Service extends MEXP_Service {
 	 *
 	 * Allows the service to enqueue JS/CSS only when it's required.
 	 */
-	public function load() {
+	public function load()
+	{
 		add_filter('mexp_tabs', array($this, 'tabs'), 10, 1);
 		add_filter('mexp_labels', array($this, 'labels'), 10, 1);
-		wp_enqueue_style('mexp-service-anvato', ANVATO_URL . 'mexp/style.css', array('mexp'), '0.1.5');
-		wp_enqueue_script('mexp-service-anvato', ANVATO_URL . 'mexp/js.js', array('jquery', 'mexp'), '0.1.5');
+		
+		wp_enqueue_style('mexp-service-anvato', ANVATO_URL . 'mexp/style.css',
+			array('mexp'), '0.1.5'
+		);
+		wp_enqueue_script('mexp-service-anvato', ANVATO_URL . 'mexp/js.js',
+			array('jquery', 'mexp'), '0.1.5'
+		);
 	}
 
 	/**
@@ -39,13 +47,16 @@ class MEXP_Anvato_Service extends MEXP_Service {
 	 *     error.
 	 */
 	public function request(array $request) 
-        {
+	{
 		$params = array();
-		if (!empty($request['params']['q'])) {
+		if (!empty($request['params']['q']))
+		{
 			$params['lk'] = sanitize_text_field($request['params']['q']);
 		}
-		
-		switch ($request['params']['type']) {
+		$params['page_no'] = isset($request['page']) && ((int)$request['page'] > 0) ?
+									(int)$request['page'] : 1;
+		switch ($request['params']['type'])
+		{
 			case "live":
 				$callback = "generate_mexp_response_for_channel";
 				break;
@@ -53,6 +64,7 @@ class MEXP_Anvato_Service extends MEXP_Service {
 				$callback = "generate_mexp_response_for_playlist";
 				break;
 			case "vod":
+				$params['exp_date'] = date("F j, Y");
 			default:
 				$callback = "generate_mexp_response_for_vod";
 				break;
@@ -60,15 +72,19 @@ class MEXP_Anvato_Service extends MEXP_Service {
 
 		$params['station'] = $request['params']['station'];
 		$params['type'] = $request['params']['type'];
-                // Save user pref.
-                $cookie = json_encode($params);
-                setcookie('anv_user_preferences', $cookie,  time()+WEEK_IN_SECONDS, ADMIN_COOKIE_PATH, COOKIE_DOMAIN );
+		// Save user pref.
+		$cookie = json_encode($params);
+		setcookie('anv_user_preferences', $cookie, 
+			time()+WEEK_IN_SECONDS, ADMIN_COOKIE_PATH, COOKIE_DOMAIN
+		);
 
 		$results = Anvato_Library()->search($params);
 
-		if (is_wp_error($results)) {
+		if (is_wp_error($results))
+		{
 			return $results;
-		} elseif (empty($results)) {
+		} elseif (empty($results))
+		{
 			return false;
 		}
 
@@ -80,11 +96,12 @@ class MEXP_Anvato_Service extends MEXP_Service {
 	function generate_mexp_response_for_vod($results) 
 	{
 		$response = new MEXP_Response();
-		foreach ($results as $video) {
-                	$item = new MEXP_Response_Item();
-                        $title = mb_strimwidth((string) $video->title, 0, 50, "...");
+		foreach ($results as $video)
+		{
+			$item = new MEXP_Response_Item();
+			$title = mb_strimwidth((string) $video->title, 0, 50, "...");
 			$item->set_content(sanitize_text_field($title));
-                        $description = mb_strimwidth((string) $video->description, 0, 60, "...");
+			$description = mb_strimwidth((string) $video->description, 0, 60, "...");
 			$item->add_meta("description", sanitize_text_field($description));
 			$item->add_meta("duration", sanitize_text_field((string) $video->duration));
 			$item->add_meta("category", sanitize_text_field((string) $video->categories->primary_category));
@@ -109,17 +126,17 @@ class MEXP_Anvato_Service extends MEXP_Service {
 	function generate_mexp_response_for_playlist($results) 
 	{
 		$response = new MEXP_Response();
-		foreach ($results as $playlist) {
+		foreach ($results as $playlist)
+		{
 			$item = new MEXP_Response_Item();
 			$item->set_content(sanitize_text_field((string) $playlist->playlist_title));
                         
-                        $description = mb_strimwidth((string) $playlist->description, 0, 50, "...");
+			$description = mb_strimwidth((string) $playlist->description, 0, 50, "...");
 			$item->add_meta("description", sanitize_text_field($description));
 			$item->add_meta("video_count", sanitize_text_field((string) $playlist->item_count . "" ) );
 			$item->add_meta("type", "playlist");
-                        $item->set_id(intval((string) $playlist->playlist_id));
-                        
-                        
+			$item->set_id(intval((string) $playlist->playlist_id));
+			
 			$item->url = $this->generate_shortcode((string) $playlist->playlist_id, 'playlist');
 			/**
 			 * Filter the video item to be added to the response.
@@ -134,11 +151,11 @@ class MEXP_Anvato_Service extends MEXP_Service {
 	}
 
 	function generate_mexp_response_for_channel($results) 
-        {
+	{
 		$response = new MEXP_Response();
 		
-		foreach ($results as $channel) {
-			
+		foreach ($results as $channel)
+		{			
 			$item = new MEXP_Response_Item();
 			$item->set_content(sanitize_text_field((string) $channel->channel_name) );
 			$item->add_meta("category", "Live Stream");
@@ -166,22 +183,22 @@ class MEXP_Anvato_Service extends MEXP_Service {
 			 */
 			if ( !empty( $channel->monetized_channels ) )
 			{
-                            foreach ( (array) $channel->monetized_channels as $mchannel )
-                            {   
-                                $item = new MEXP_Response_Item();
-                                $item->set_content(sanitize_text_field((string) $mchannel->monetized_name) );
-                                $item->add_meta("category", "Monetized Live Stream");
-                                $item->add_meta("embed_id", "{$mchannel->embed_id}");
-                                $item->add_meta("type", "live");
-                                $item->set_id( (string) $mchannel->embed_id );
-                                $icon_url = (string) $channel->icon_url;
-                                $icon_url = $icon_url === "" ? ANVATO_URL . 'img/channel_icon.png' : $icon_url;
-                                $item->set_thumbnail( (string) $icon_url );
-                                $item->set_date( time() );
-                                $item->set_date_format("M j, Y, g:i a");
-                                $item->url = $this->generate_shortcode((string) $mchannel->embed_id);
-                                $response->add_item(apply_filters('anvato_mexp_response_item', $item, $mchannel));
-                            }
+				foreach ( (array) $channel->monetized_channels as $mchannel )
+				{   
+					$item = new MEXP_Response_Item();
+					$item->set_content(sanitize_text_field((string) $mchannel->monetized_name) );
+					$item->add_meta("category", "Monetized Live Stream");
+					$item->add_meta("embed_id", "{$mchannel->embed_id}");
+					$item->add_meta("type", "live");
+					$item->set_id( (string) $mchannel->embed_id );
+					$icon_url = (string) $channel->icon_url;
+					$icon_url = $icon_url === "" ? ANVATO_URL . 'img/channel_icon.png' : $icon_url;
+					$item->set_thumbnail( (string) $icon_url );
+					$item->set_date( time() );
+					$item->set_date_format("M j, Y, g:i a");
+					$item->url = $this->generate_shortcode((string) $mchannel->embed_id);
+					$response->add_item(apply_filters('anvato_mexp_response_item', $item, $mchannel));
+				}
 			}
 			
 		}
@@ -195,7 +212,8 @@ class MEXP_Anvato_Service extends MEXP_Service {
 	 * @param int $video The video ID
 	 * @return string The shortcode
 	 */
-	private function generate_shortcode( $video_id, $type='vod' ) {
+	private function generate_shortcode( $video_id, $type='vod' )
+	{
 		return '[anvplayer '.($type==='vod'?'video':'playlist').'="' . esc_attr($video_id) . '"]';
 	}
 
@@ -205,7 +223,8 @@ class MEXP_Anvato_Service extends MEXP_Service {
 	 * @param array $tabs Associative array of default tab items.
 	 * @return array Associative array of tabs. The key is the tab ID and the value is an array of tab attributes.
 	 */
-	public function tabs(array $tabs) {
+	public function tabs(array $tabs)
+	{
 		$tabs[ANVATO_DOMAIN_SLUG] = array(
 			'all' => array(
 				'defaultTab' => true,
@@ -223,7 +242,8 @@ class MEXP_Anvato_Service extends MEXP_Service {
 	 * @param array $labels Associative array of default labels.
 	 * @return array Associative array of labels.
 	 */
-	public function labels(array $labels) {
+	public function labels(array $labels)
+	{
 		$labels[ANVATO_DOMAIN_SLUG] = array(
 			'insert' => __('Insert Video', ANVATO_DOMAIN_SLUG),
 			'noresults' => __('No videos matched your search query.', ANVATO_DOMAIN_SLUG),
