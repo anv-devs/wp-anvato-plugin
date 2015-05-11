@@ -251,7 +251,7 @@ class Anvato_Library {
 	 * @return array|WP_Error Array with SimpleXMLElements of any videos found, or WP_Error on failure.
 	 */
 	public function search( $args = array(), $output_type = 'clean' ) {
-		if ( empty($args['station']) ) {
+		if ( empty( $args['station'] ) ) {
 			return new WP_Error(
 				'missing_required_settings', 
 				__( 'Please select station.', ANVATO_DOMAIN_SLUG )
@@ -277,16 +277,16 @@ class Anvato_Library {
 		$this->xml_body = str_replace( "%API_METHOD%", $api_method, $this->xml_body );
 
 		$response = $this->request($this->build_request_params($args));
-		if (is_wp_error($response)) {
-				return $response;
+		if ( is_wp_error( $response ) ) {
+			return $response;
 		}
 				
 		$xml = simplexml_load_string( wp_remote_retrieve_body( $response ) );
 		if ( !is_object( $xml ) ) {
-				return new WP_Error(
-					'parse_error', 
-					__( 'There was an error processing the search results.', ANVATO_DOMAIN_SLUG )
-				);
+			return new WP_Error(
+				'parse_error', 
+				__( 'There was an error processing the search results.', ANVATO_DOMAIN_SLUG )
+			);
 		}
 		
 		if ( $output_type === 'xml' ) {
@@ -297,13 +297,13 @@ class Anvato_Library {
 
 			case 'list_categories':
 				return $xml->params->category_list->xpath("//category");
-				
+
 			case 'list_embeddable_channels':
 				return $xml->params->channel_list->xpath("//channel");
-				
+
 			case 'list_playlists':
 				return $xml->params->video_list->xpath("//playlist");
-				
+
 			case 'list_videos':
 				return $xml->params->video_list->xpath("//video");
 
