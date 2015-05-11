@@ -23,10 +23,10 @@ class Anvato_Library {
 	 * Allowed API calls
 	 */
 	private $api_methods = array(
-			'live' => 'list_embeddable_channels',
-			'vod' => 'list_videos',
-			'playlist' => 'list_playlists',
-			'categories' => 'list_categories'
+		'categories' => 'list_categories',
+		'live' => 'list_embeddable_channels',
+		'playlist' => 'list_playlists',
+		'vod' => 'list_videos',
 	);
 	
 	/**
