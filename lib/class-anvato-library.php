@@ -22,7 +22,13 @@ class Anvato_Library {
     /**
      * Allowed API calls
      */
-    private $api_methods = array('live' => 'list_embeddable_channels', 'vod' => 'list_videos', 'playlist' => 'list_playlists');
+    private $api_methods = array(
+    		'live' => 'list_embeddable_channels',
+    		'vod' => 'list_videos',
+    		'playlist' => 'list_playlists',
+    		'categories' => 'list_categories'
+    );
+    
     /**
      * The value of the plugin settings on instantiation.
      *
@@ -69,7 +75,8 @@ class Anvato_Library {
      */
     public static function get_instance() 
     {
-        if (null == self::$instance) {
+        if (null == self::$instance)
+        {
             self::$instance = new self;
         }
         return self::$instance;
@@ -82,7 +89,10 @@ class Anvato_Library {
      */
     public function has_required_settings()
     {
-        return !( empty($this->general_settings) || false !== array_search('', array($this->general_settings['mcp']['url'], $this->selected_station['public_key'], $this->selected_station['private_key'])) );
+        return !( empty($this->general_settings) ||
+        			false !== array_search('', array($this->general_settings['mcp']['url'],
+							$this->selected_station['public_key'], $this->selected_station['private_key']) )
+        		);
     }
 
     /**
@@ -98,31 +108,41 @@ class Anvato_Library {
         return base64_encode(hash_hmac('sha256', $this->xml_body . $time, $this->selected_station['private_key'], true));
     }
 
-	/**
-	 * Set up the filtering conditions to use as part of a search of the library.
-	 *
-	 * @param array $args {
-	 *		@type string $lk Search keyword.
-	 * }
-	 * @return array.
-	 */
-	private function build_request_params( $args = array() ) {
-		$params = array();
-
-		if (array_key_exists('lk', $args)) {
-			// Special case for "LK", whatever that means
-			$params = array(
-				'filter_by' => array( 'name' ),
-				'filter_cond' => array( 'lk' ),
-				'filter_value' => array( sanitize_text_field( $args['lk'] ) ),
-			);
-		} else {
-			// Generic case - assume the proper terms are passed and use them with API
-			$params = $args;
-		}
-
-		return $params;
-	}
+    /**
+     * Set up the filtering conditions to use as part of a search of the library.
+     *
+     * @param array $args {
+     * 		@type string $lk video title search keyword.
+     * 		@type string $exp_date Used for video search, if set result includes videos that expire later than this date.
+     * 		@type int $page_no page offset, starting with 1.
+     * }
+     * @return array.
+     */
+    private function build_request_params($args = array()) 
+    {
+        $params = array();
+        
+        if(isset($args['lk']))
+        {
+        	$params['filter_by'][] = 'name';
+        	$params['filter_cond'][] = 'lk';
+        	$params['filter_value'][] = rawurlencode(sanitize_text_field($args['lk']));
+        }
+        
+        if(isset($args['exp_date']))
+        {
+        	$params['filter_by'][] = 'exp_date';
+			$params['filter_cond'][] = 'ge';
+			$params['filter_value'][] = rawurlencode(sanitize_text_field($args['exp_date']));
+        }
+        
+        if(isset($args['page_no']))
+        {
+        	$params['page_no'] = (int)$args['page_no'];
+        }
+        
+        return $params;
+    }
 
     /**
      * Construct the URL to send to the API.
@@ -138,7 +158,10 @@ class Anvato_Library {
     private function build_request_url($params = array(), $time) 
     {
         return sprintf(
-                $this->api_request_url, esc_url($this->general_settings['mcp']['url']), $time, urlencode($this->build_request_signature($time)), $this->selected_station['public_key'], build_query($params)
+                $this->api_request_url, 
+        		esc_url($this->general_settings['mcp']['url']), $time, 
+        		urlencode($this->build_request_signature($time)), 
+        		$this->selected_station['public_key'], build_query($params)
         );
     }
 
@@ -195,11 +218,11 @@ class Anvato_Library {
         $args = array('body' => $this->xml_body);
         if (function_exists('vip_safe_wp_remote_get')) 
         {
-                $response = vip_safe_wp_remote_get($url, false, 3, 1, 20, $args);
+                $response = vip_safe_wp_remote_get(esc_url_raw($url), false, 3, 1, 20, $args);
         }
         else 
         {
-                $response = wp_remote_get($url, $args);
+                $response = wp_remote_get(esc_url_raw($url), $args);
         }
 
         if (is_wp_error($response)) 
@@ -211,7 +234,7 @@ class Anvato_Library {
         {
                 if ($this->is_api_error($response)) 
                 {
-                        return new WP_Error('api_error', sprintf(__('Anvato responded with an error (%s).', ANVATO_DOMAIN_SLUG), $this->get_api_error($response)));
+                        return new WP_Error('api_error', sprintf(__('%s Please check your configuration parameters on Settings page.', ANVATO_DOMAIN_SLUG), $this->get_api_error($response)));
                 }
 
                 return $response;
@@ -225,17 +248,19 @@ class Anvato_Library {
      *
      * @see  $this->build_request_parameters() for allowed search parameters.
      *
-     * @param  array $args Search parameters.
+     * @param array $args Search parameters.
+     * @param string $output_type Desired output type, 'xml' for raw API output.
+     * 
      * @return array|WP_Error Array with SimpleXMLElements of any videos found, or WP_Error on failure.
      */
-    public function search($args = array()) 
+    public function search( $args = array(), $output_type = 'clean' ) 
     {
         if ( empty($args['station']) )
         {
                 return new WP_Error('missing_required_settings', __('Please select station.', ANVATO_DOMAIN_SLUG));
         }
 
-        if ( empty($this->api_methods[$args['type']]) ) 
+        if ( !isset($this->api_methods[$args['type']]) || empty($this->api_methods[$args['type']]) ) 
         {
                 return new WP_Error('missing_required_settings', __('Unknow API call.', ANVATO_DOMAIN_SLUG));
         }
@@ -264,20 +289,26 @@ class Anvato_Library {
         {
                 return new WP_Error('parse_error', __('There was an error processing the search results.', ANVATO_DOMAIN_SLUG));
         }
-
-        if ($api_method === 'list_videos') 
+        
+        if ( $output_type === 'xml' )
         {
-                return $xml->params->video_list->xpath("//video");
+        	return $xml->params;
         }
-        else if ($api_method === 'list_playlists') 
+        
+        switch ( $api_method )
         {
-                return $xml->params->video_list->xpath("//playlist");
-        }
-        else if ($api_method === 'list_embeddable_channels') 
-        {
-                return $xml->params->channel_list->xpath("//channel");
-        }
-   
+        	case 'list_categories':
+        		return $xml->params->category_list->xpath("//category");
+        		
+        	case 'list_embeddable_channels':
+        		return $xml->params->channel_list->xpath("//channel");
+        		
+        	case 'list_playlists':
+        		return $xml->params->video_list->xpath("//playlist");
+        		
+        	case 'list_videos':
+        		return $xml->params->video_list->xpath("//video");
+        }   
     }
 
 }
@@ -288,5 +319,5 @@ class Anvato_Library {
  * @return object.
  */
 function Anvato_Library() {
-    return Anvato_Library::get_instance();
+	return Anvato_Library::get_instance();
 }

@@ -1,4 +1,5 @@
 <?php
+define ('EXT_ID_PREFIX', 'WN');
 
 global $anvato_player_index;
 $anvato_player_index = 0;
@@ -23,22 +24,48 @@ function anvato_shortcode($attr)
 	    'width' => $player['width'],
 	    'height' => $player['height'],
 	    'video' => null,
+    	'ext_id' => null,
 	    'autoplay' => false
 	), $attr, 'anvplayer');
+    
+    $json['height'] = $json['height'].$player['height_type'];
+    $json['width'] = $json['width'].$player['width_type'];
 
     $video_ids = explode(",", $json["video"]);
-    if (sizeof($video_ids) > 1) {
+    if (sizeof($video_ids) > 1) 
+    {
         unset($json["video"]);
         $json["playlist"] = $video_ids;
     }
-    elseif (!empty($attr['playlist'])) {
+    else if (!empty($attr['playlist'])) 
+    {
         unset($json["video"]);
         $json["playlist"] = $attr['playlist'];
+    } else if(!empty($json['ext_id']))
+    {
+    	$extern_ids = explode(",", $json["ext_id"]);
+    	$video_ids = array();
+    	foreach ($extern_ids as $extern_id)
+    	{
+    		$video_ids[] = EXT_ID_PREFIX.$extern_id;
+    	}
+    	
+    	if(sizeof($video_ids) > 1)
+    	{
+    		unset($json["video"]);
+    		$json["playlist"] = $video_ids;
+    	} else 
+    	{
+    		$json["video"] = $video_ids[0];
+    	}  	
     }
-
-    if (!empty($mcp['mcp']['tkx_key'])) {
-        $json['config']['accessKey'] = $mcp['mcp']['tkx_key'];
-        $json['config']['accessControl']['preview'] = false;
+    
+    unset($json["ext_id"]);
+    
+    if (!empty($mcp['mcp']['tkx_key'])) 
+    {
+        $json['accessKey'] = $mcp['mcp']['tkx_key'];
+        $json['accessControl']['preview'] = false;
     }
 
     $json['autoplay'] = ( 'true' == $json['autoplay'] );
@@ -70,26 +97,53 @@ function anvato_shortcode($attr)
         )
     );
 
-    foreach ($plugin_map as $name => $plugin) {
-        foreach ($plugin as $field => $var) {
-            if (!empty($analytics[$var])) {
+    foreach ($plugin_map as $name => $plugin) 
+    {
+        foreach ($plugin as $field => $var) 
+        {
+            if (!empty($analytics[$var])) 
+            {
                 $json['plugins'][$name][$field] = $analytics[$var];
             }
         }
     }
 
     // Set the DFP Ad Tag, which can also be overridden
-    if (!empty($monetization['advanced_targeting'])) {
+    if (!empty($monetization['advanced_targeting'])) 
+    {
         $json['plugins']['dfp'] = json_decode($monetization['advanced_targeting'], true);
     }
-    else {
+    else 
+    {
         // User can close or change own dfp in shortcode
-        if (!empty($attr['plugin_dfp_adtagurl']) && $attr['plugin_dfp_adtagurl'] !== 'false') {
+        if (!empty($attr['plugin_dfp_adtagurl']) && $attr['plugin_dfp_adtagurl'] !== 'false') 
+        {
             $json['plugins']['dfp']['adTagUrl'] = urldecode($attr['plugin_dfp_adtagurl']);
         }
-        elseif (!empty($monetization['adtag'])) {
+        elseif (!empty($monetization['adtag'])) 
+        {
             $json['plugins']['dfp']['adTagUrl'] = $monetization['adtag'];
         }
+    }
+    
+    if(isset($attr['dfpkeyvalues'])) 
+    {
+    	$dfp_kv = json_decode($attr['dfpkeyvalues'],true);
+    	
+    	$json['plugins']['dfp']['clientSide']['keyValues'] = 
+    			isset($json['plugins']['dfp']['clientSide']['keyValues']) ?
+					array_merge($json['plugins']['dfp']['clientSide']['keyValues'], $dfp_kv) : $dfp_kv;
+    }
+    
+    //only in video mode, not in playilst mode
+    if( isset($attr['no_pr']) && 'true' == $attr['no_pr'] && isset($json["video"]) )
+    {
+    	unset($json['plugins']['dfp']);
+    }
+    
+    if(isset($json['video']) && is_string($json['video']) && substr($json['video'],0,1) === 'c' )
+    {
+    	$json['androidIntentPlayer'] = 'true';
     }
 
     # Allow theme/plugins to filter the JSON before outputting

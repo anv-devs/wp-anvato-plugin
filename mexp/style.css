@@ -13,6 +13,7 @@
 .mexp-content-wp_anvato .attachment.details{-webkit-box-shadow:0 0 0 1px #fff,0 0 0 5px #cf242a;box-shadow:0 0 0 1px #fff,0 0 0 5px #cf242a}
 .anv-title{font-weight:700;font-size:14px;color:#222;line-height:14px;display:block;padding:3px 0}
 .anv-desc{display:block;color:#565656;line-height:13px;font-size:13px}
+.anv-disabled{font-style: italic;}
 .anv-logo{width:143px;height:31px;display:inline-block;float:right;margin-right:10px}
 .mexp-item-thumb > img{display:none;width:55px!important;height:55px;position:absolute;left:75px;top:30px}
 .mexp-item-thumb:hover > img{display:block}

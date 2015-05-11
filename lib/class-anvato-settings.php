@@ -31,8 +31,16 @@ class Anvato_Settings
 			array( 'id' => 'section_player', 'title' => 'Player Settings', 'callback' => array("Anvato_Callbacks", "__html_line") ,
 				'fields' => array(
 					array( 'id' => 'player_url', 'title' => 'Player URL*:'),
-					array( 'id' => 'height', 'title' => 'Height:', 'args' => array('size' => 4, 'after_field' => ' px') ),
-					array( 'id' => 'width', 'title' => 'Width:', 'args' => array('size' => 4, 'after_field' => ' px') )
+						
+					array( 'id' => 'height', 'title' => 'Height:', 'args' => array(
+								'size' => 4, 'select_field' => 'height_type',
+								'parent' => self::PLAYER_SETTINGS_KEY, 'after_text' => false ),
+							'callback' => array("Anvato_Form_Fields", "hw_field") ),
+						
+					array( 'id' => 'width', 'title' => 'Width:', 'args' => array(
+								'size' => 4, 'select_field' => 'width_type',
+								'parent' => self::PLAYER_SETTINGS_KEY, 'after_text' => false ),
+							'callback' => array("Anvato_Form_Fields", "hw_field") )
 				)
 			)
 		),
@@ -91,13 +99,14 @@ class Anvato_Settings
 
 	protected function __construct()
 	{
-	    $this->admin_settings();
+		$this->admin_settings();
 	}
 
 	public static function instance()
 	{
-	    if (!isset(self::$instance)) {
-		self::$instance = new Anvato_Settings;
+	    if (!isset(self::$instance))
+	    {
+			self::$instance = new Anvato_Settings;
 	    }
 	    return self::$instance;
 	}
@@ -109,6 +118,8 @@ class Anvato_Settings
 	{
 	    if (!is_admin()) return;
 
+	    wp_enqueue_script('common-js-anvato', ANVATO_URL . 'lib/common.js', array('jquery'), '0.1.5');
+	    
 	    // Add the main Anvato Settings page in "Settings"
 	    add_action( 'admin_menu', array( 'Anvato_Callbacks', '__admin_menu' ) );
 
@@ -116,7 +127,8 @@ class Anvato_Settings
 	    add_action( 'admin_init', array( $this, 'admin_settings_page_setup' ) );
 
 	    // add settings link in the plugin activation panel, if available
-	    if (has_action('plugin_action_links')) {
+	    if (has_action('plugin_action_links'))
+	    {
 		    add_filter( 'plugin_action_links', array('Anvato_Callbacks','__plugin_action_links'), 10, 2 );
 	    }
 	}
@@ -127,7 +139,9 @@ class Anvato_Settings
 	public function admin_settings_page_setup()
 	{
 	    if (!is_admin())
-		return;
+	    {
+	    	return;
+	    }
 
 	    $setup_key_value = $this->get_option(self::AUTOMATIC_SETUP_KEY, 0);
 	    /*
@@ -135,29 +149,31 @@ class Anvato_Settings
 	      we should not show ANY other tabs, until the core settings is setup.
 	      When setup finished, setup key will be false
 	     */
-	    if (empty($setup_key_value)) {
-		$this->plugin_settings_tabs = array();
-		$this->plugin_settings_tabs[self::AUTOMATIC_SETUP_KEY] = "Plugin Setup";
-		$this->create_settings_section(self::AUTOMATIC_SETUP_KEY);
-		$this->remote_setup = true;
+	    if (empty($setup_key_value))
+	    {
+			$this->plugin_settings_tabs = array();
+			$this->plugin_settings_tabs[self::AUTOMATIC_SETUP_KEY] = "Plugin Setup";
+			$this->create_settings_section(self::AUTOMATIC_SETUP_KEY);
+			$this->remote_setup = true;
 	    }
-	    else {
-		// Player Tab
-		$this->plugin_settings_tabs = array();
-		$this->plugin_settings_tabs[self::PLAYER_SETTINGS_KEY] = "Player";
-		$this->create_settings_section(self::PLAYER_SETTINGS_KEY);
-
-		// Analytics Tab
-		$this->plugin_settings_tabs[self::ANALYTICS_SETTINGS_KEY] = "Analytics";
-		$this->create_settings_section(self::ANALYTICS_SETTINGS_KEY);
-
-		// Monetization Tab
-		$this->plugin_settings_tabs[self::MONETIZATION_SETTINGS_KEY] = "Monetization";
-		$this->create_settings_section(self::MONETIZATION_SETTINGS_KEY);
-
-		// Access Tab
-		$this->plugin_settings_tabs[self::GENERAL_SETTINGS_KEY] = "Access";
-		$this->create_settings_section(self::GENERAL_SETTINGS_KEY);
+	    else
+	    {
+			// Player Tab
+			$this->plugin_settings_tabs = array();
+			$this->plugin_settings_tabs[self::PLAYER_SETTINGS_KEY] = "Player";
+			$this->create_settings_section(self::PLAYER_SETTINGS_KEY);
+	
+			// Analytics Tab
+			$this->plugin_settings_tabs[self::ANALYTICS_SETTINGS_KEY] = "Analytics";
+			$this->create_settings_section(self::ANALYTICS_SETTINGS_KEY);
+	
+			// Monetization Tab
+			$this->plugin_settings_tabs[self::MONETIZATION_SETTINGS_KEY] = "Monetization";
+			$this->create_settings_section(self::MONETIZATION_SETTINGS_KEY);
+	
+			// Access Tab
+			$this->plugin_settings_tabs[self::GENERAL_SETTINGS_KEY] = "Access";
+			$this->create_settings_section(self::GENERAL_SETTINGS_KEY);
 	    }
 	}
 
@@ -165,28 +181,31 @@ class Anvato_Settings
 	private function create_settings_section($key)
 	{
 		$plugin_sections = $this->plugin_fields[$key];
-		foreach ($plugin_sections as $section) {
+		foreach ($plugin_sections as $section)
+		{
 		    register_setting($key, $key, array($this, 'sanitize_options'));
 
 		    add_settings_section(
 			    $section['id'], __($section['title'], ANVATO_DOMAIN_SLUG), $section['callback'], $key
 		    );
 
-		    foreach ($section['fields'] as $field) {
-			if (empty($field['args'])) {
-			    $field['args'] = array();
-			}
-
-			$args = array_merge(array(
-			    'name' => "{$key}[{$field['id']}]",
-			    'value' => empty($field['no_value']) ? $this->get_option($key, $field['id']) : '',
-				), $field['args']);
-
-			$callback = !empty($field['callback']) ? $field['callback'] : array('Anvato_Form_Fields', 'field');
-
-			add_settings_field(
-				$field['id'], __($field['title'], ANVATO_DOMAIN_SLUG), $callback, $key, $section['id'], $args
-			);
+		    foreach ($section['fields'] as $field)
+		    {
+				if (empty($field['args']))
+				{
+				    $field['args'] = array();
+				}
+	
+				$args = array_merge(array(
+				    'name' => "{$key}[{$field['id']}]",
+				    'value' => empty($field['no_value']) ? $this->get_option($key, $field['id']) : '',
+					), $field['args']);
+	
+				$callback = !empty($field['callback']) ? $field['callback'] : array('Anvato_Form_Fields', 'field');
+	
+				add_settings_field(
+					$field['id'], __($field['title'], ANVATO_DOMAIN_SLUG), $callback, $key, $section['id'], $args
+				);
 		    }
 		}
 	}
@@ -194,7 +213,8 @@ class Anvato_Settings
 	private function do_autosetup($key)
 	{
 		$autoconfigkey_decoded = json_decode(base64_decode($key), true);
-		if (empty($autoconfigkey_decoded['b']) || empty($autoconfigkey_decoded['k'])) {
+		if (empty($autoconfigkey_decoded['b']) || empty($autoconfigkey_decoded['k']))
+		{
 		    return 0;
 		}
 
@@ -206,19 +226,20 @@ class Anvato_Settings
 		}
 
 		$response_data = wp_remote_retrieve_body($result_response);
-		if (empty($response_data)) {
+		if (empty($response_data))
+		{
 		    return 0;
 		}
 
 		$result = json_decode($response_data, TRUE);
 
-		if (empty($result['player']) || empty($result['mcp']) || empty($result['owners'])) {
+		if (empty($result['player']) || empty($result['mcp']) || empty($result['owners']))
+		{
 		    return 0;
 		}
 
 		// Set automatic Player settings
 		// this will not overwrite existing options!
-      delete_option(self::PLAYER_SETTINGS_KEY);
 		add_option(self::PLAYER_SETTINGS_KEY, $result['player'], '', 'no');
 		unset($result['player']);
 
@@ -247,12 +268,25 @@ class Anvato_Settings
 		}
 		?>
 		<div class="wrap">
-			<h2><img src="<?php echo esc_url( ANVATO_URL . 'img/logo.png' ) ?>" alt="<?php esc_attr_e( 'Anvato Video Plugin Settings', ANVATO_DOMAIN_SLUG ); ?>" /></h2>
+			<h2><img src="<?php 
+						echo esc_url( ANVATO_URL . 'img/logo.png' ) ?>"
+					alt="<?php esc_attr_e( 'Anvato Video Plugin Settings', ANVATO_DOMAIN_SLUG ); ?>"
+				/>
+			</h2>
 
 			<?php if(get_query_var('setup-state', '0')) { ?>
 				<div id="message" class="updated">
 					<p>
 						<strong>Your plugin is successfully setup.</strong>
+					</p>
+				</div>
+			<?php } ?>
+			<div id="anv_msg_board" class="error" style="display: none"><p></p></div>
+			<?php if(isset($_GET['auto_err']) && $_GET['auto_err'])
+				{ ?>
+				<div class="error">
+					<p>
+						<strong>Incorrect key provided, please provide correct key or set up manually.</strong>
 					</p>
 				</div>
 			<?php } ?>
@@ -262,31 +296,46 @@ class Anvato_Settings
 			<?php screen_icon(); ?>
 			<h2 class="nav-tab-wrapper">
 			<?php
-			foreach ($this->plugin_settings_tabs as $key => $name) {
+			foreach ($this->plugin_settings_tabs as $key => $name)
+			{
 			    $tab_class = array('nav-tab');
 			    if ($active_tab == $key)
 			    {
-				$tab_class[] = 'nav-tab-active';
+					$tab_class[] = 'nav-tab-active';
 			    }
 			?>
-			    <a class="<?php echo esc_attr(implode(' ', $tab_class)); ?>" href="<?php echo esc_url(admin_url('options-general.php?page=' . ANVATO_DOMAIN_SLUG . '&tab=' . $key)); ?>"><?php echo esc_html($name); ?></a>
-			<?php } ?>
+			    <a class="<?php echo esc_attr(implode(' ', $tab_class)); ?>"
+			    	href="<?php 
+			    		echo esc_url(admin_url('options-general.php?page=' . ANVATO_DOMAIN_SLUG . '&tab=' . $key));
+			    	?>">
+			    	<?php echo esc_html($name); ?>
+			    </a>
+			<?php
+			}
+			?>
 			</h2>
 			<form method="post" action="options.php">
-		<?php 
+			<?php 
 		    wp_nonce_field( 'anvato-update-options' );
 				    settings_fields( $active_tab );  
 				    do_settings_sections( $active_tab ); 
-                ?>
+			?>
 			<hr/>
 			<?php 
 			if( $this->remote_setup ) 
-			{ // User wants make a manual setup so secondary button was added even though it usesless. ?>
-				<?php submit_button( 'Automated Setup', 'primary large', 'remote_setup', false ); ?>
-				<?php submit_button( 'Manual Setup', 'secondary large', 'manual_setup', false ); ?>
-		<?php } else {
-			submit_button();
-                }?>
+			{
+				$attr = array('onClick' => 'return check_auto_setup_key()');
+				submit_button( 'Automated Setup', 'primary large', 'remote_setup', false, $attr );
+				submit_button( 'Manual Setup', 'secondary large', 'manual_setup', false );
+			} else
+			{
+				$attr = array();
+				if($active_tab == 'anvato_player')
+				{
+					$attr = array('onClick' => 'return validate_hw_fields()');
+				}
+				submit_button( 'Save Changes', 'primary', 'submit', false, $attr );
+			}?>
 			</form>
 		</div>
 		<?php
@@ -303,30 +352,47 @@ class Anvato_Settings
 	{
 		$clean = array();
 		// if its not array, make it into one
-		if (!is_array($dirty)) {
+		if (!is_array($dirty))
+		{
 		    $dirty = (array) $dirty;
 		}
 		$clean = array_map('sanitize_text_field', $dirty);
 
-		if (array_key_exists('mcp_config_automatic_key', $clean)) {
-		    $result = "";
-		    if (!empty($clean['mcp_config_automatic_key'])) {
-			// For when we can do automatic setup from the 64bit key
-			$result = $this->do_autosetup($clean['mcp_config_automatic_key']);
-			unset($clean['mcp_config_automatic_key']);
+		if (array_key_exists('mcp_config_automatic_key', $clean))
+		{
+		    $result = 1;
+		    $extra_param = '';
+		    if (!empty($clean['mcp_config_automatic_key'])) 
+			{
+				// For when we can do automatic setup from the 64bit key
+				$result = $this->do_autosetup($clean['mcp_config_automatic_key']);
+				
+				if(!$result)
+				{
+					$extra_param = '&auto_err=1';
+				}			
+		    } else 
+			{
+				$extra_param = '&tab=anvato_mcp';
+			}
+		    
+		    delete_option(self::AUTOMATIC_SETUP_KEY);
+		    
+		    if($result)
+		    {
+		    	add_option(self::AUTOMATIC_SETUP_KEY, $result, '', 'no');
+				unset($clean['mcp_config_automatic_key']);
 		    }
 
-		    delete_option(self::AUTOMATIC_SETUP_KEY);
-		    add_option(self::AUTOMATIC_SETUP_KEY, $result, '', 'no');
-
 		    // and then we want to get out of the process altogether and not create a DB item
-		    wp_redirect(admin_url(
+		    wp_redirect( esc_url_raw ( admin_url(
 				    'options-general.php?page=' . ANVATO_DOMAIN_SLUG .
-				    '&setup-state=' . $result
-		    ));
+				    '&setup-state=' . $result . $extra_param
+		    )));
 		    exit; // terminate advancing further, so the redirect works proper
 		}
-		elseif (array_key_exists('reset_settings', $clean)) {
+		elseif (array_key_exists('reset_settings', $clean))
+		{
 		    /*
 		     * Check the reset action was stored. If yes, clean up all stored settings and then 
 		     * redirect user to automatic setup screen  
@@ -337,12 +403,44 @@ class Anvato_Settings
 		    delete_option(self::ANALYTICS_SETTINGS_KEY);
 		    delete_option(self::AUTOMATIC_SETUP_KEY);
 
-		    wp_redirect(admin_url(
+		    wp_redirect( esc_url_raw ( admin_url(
 				    'options-general.php?page=' . ANVATO_DOMAIN_SLUG .
 				    '&reset-success=true'
-		    ));
+		    )));
 		    exit; // terminate advancing further, so the redirect works proper
 		}
+
+		$hw_limits = array( 'h_abs_min' => 100, 'w_abs_min' => 100, 'h_rel_min' => 1, 'w_rel_min' => 1,
+							'h_abs_max' => 1000, 'w_abs_max' => 1000, 'h_rel_max' => 100, 'w_rel_max' => 100,
+							'h_abs_def' => 640, 'w_abs_def' => 640, 'h_rel_def' => 100, 'w_rel_def' => 100 );
+
+		//First height...
+		$max_val = $clean['height_type'] == '%' ? $hw_limits['h_rel_max'] : $hw_limits['h_abs_max'];
+		$min_val = $clean['height_type'] == '%' ? $hw_limits['h_rel_min'] : $hw_limits['h_abs_min'];
+		$def_val = $clean['height_type'] == '%' ? $hw_limits['h_rel_def'] : $hw_limits['h_abs_def'];
+		$height = $def_val;
+		if (isset($clean['height_type']))
+		{
+			if(ctype_digit($clean['height'])&& (int)$clean['height'] >= $min_val  && (int)$clean['height'] <= $max_val)
+			{
+				$height = $clean['height'];
+			}
+		}
+		$clean['height'] = $height;
+		
+		//Now width...
+		$max_val = $clean['width_type'] == '%' ? $hw_limits['w_rel_max'] : $hw_limits['w_abs_max'];
+		$min_val = $clean['width_type'] == '%' ? $hw_limits['w_rel_min'] : $hw_limits['w_abs_min'];
+		$def_val = $clean['width_type'] == '%' ? $hw_limits['w_rel_def'] : $hw_limits['w_abs_def'];				
+		$width = $def_val;
+		if (isset($clean['width_type']))
+		{
+			if(ctype_digit($clean['width'])&& (int)$clean['width'] >= $min_val && (int)$clean['width'] <= $max_val)
+			{
+				$width = $clean['width'];
+			}
+		}
+		$clean['width'] = $width;
 
 		return $clean;
 	}
@@ -395,20 +493,74 @@ class Anvato_Form_Fields
      */
     static function field($args)
     {
-	if (empty($args['name']))
-	    return;
+		if (empty($args['name']))
+		{
+			return;
+		}
+	
+		$args = wp_parse_args($args, array(
+		    'type' => 'text',
+		    'size' => 50,
+		    'value' => '',
+		    'placeholder' => '',
+		    'after_field' => '',
+			));
+	
+		printf(
+			'<input type="%s" name="%s" placeholder="%s" size="%s" value="%s" />%s', 
+			esc_attr($args['type']), esc_attr($args['name']), esc_attr($args['placeholder']), 
+			esc_attr($args['size']), esc_attr($args['value']), esc_attr($args['after_field'])
+		);
+    }
+    
+    /**
+     * Generates html for height and width field with a selecti option next to it for px/%
+     * 
+     * @param array $args
+     */
+    static function hw_field($args)
+    {
+    	if (empty($args['name']))
+    	{
+    		return;
+    	}
 
-	$args = wp_parse_args($args, array(
-	    'type' => 'text',
-	    'size' => 50,
-	    'value' => '',
-	    'placeholder' => '',
-	    'after_field' => '',
+		$args = wp_parse_args($args, array(
+		    'type' => 'text',
+		    'size' => 50,
+		    'value' => '',
+			'options' => array('px','%'),
+			'select_field' => 'select_hw',
+			'parent' => 'anvato_player',
+		    'placeholder' => '',
 		));
-
-	printf(
-		'<input type="%s" name="%s" placeholder="%s" size="%s" value="%s" />%s', esc_attr($args['type']), esc_attr($args['name']), esc_attr($args['placeholder']), esc_attr($args['size']), esc_attr($args['value']), esc_attr($args['after_field'])
-	);
+	
+		$sel_val = Anvato_Settings()->get_option($args['parent'], $args['select_field']);
+		if(!$sel_val)
+		{
+			$sel_val = 'px';
+		}
+		 
+		$args['after_field'] = sprintf('<select name="%s">', esc_attr($args['parent']."[".$args['select_field']."]"));
+		
+		foreach ($args['options'] as $option)
+		{
+			$selected = $sel_val == $option ? ' selected ' : ' ';
+			$args['after_field'] .= sprintf('<option%sval="%s">%s</option>', $selected, $option, $option);
+		}
+		
+		$args['after_field'] .= '</select>';
+		if(isset($args['after_text']) && $args['after_text'])
+		{
+			$args['after_field'] .= '<p class="disabled">&nbsp;&nbsp;'.$args['after_text'].'</p>';
+		}
+		
+		printf(
+			'<input type="%s" name="%s" placeholder="%s" size="%s" value="%s" />%s', 
+			esc_attr($args['type']), esc_attr($args['name']), esc_attr($args['placeholder']), 
+			esc_attr($args['size']), esc_attr($args['value']), $args['after_field']
+		);   	
+    	
     }
 
     /**
@@ -416,24 +568,26 @@ class Anvato_Form_Fields
      */
     static function textarea($args)
     {
-	if (empty($args['name']))
-	    return;
-
-	printf(
-		'<textarea name="%s" class="large-text code" rows="15">%s</textarea>', esc_attr($args['name']), esc_attr($args['value'])
-	);
+		if (empty($args['name']))
+		{
+			return;
+		}
+	
+		printf(
+			'<textarea name="%s" class="large-text code" rows="15">%s</textarea>', esc_attr($args['name']), esc_attr($args['value'])
+		);
     }
 
     static function reset_check($args)
     {
-	printf(
-		'<input type="checkbox" name="%s" value="1" onclick="if(this.checked) return confirm(\'This will erase all plugin settings. Are you sure?\');" />'
-		, esc_attr($args['name']));
+		printf(
+			'<input type="checkbox" name="%s" value="1" onclick="if(this.checked) return confirm(\'This will erase all plugin settings. Are you sure?\');" />'
+			, esc_attr($args['name']));
     }
 
 }
 
-    /**
+/**
  * There is no support for anonymous functions on PHP 5.2.4+ hence all anonymous 
  * functions was collected in this class.
  * see more for WP requirements : https://wordpress.org/about/requirements/
@@ -475,14 +629,17 @@ class Anvato_Callbacks
 	    echo '<hr/>';
     }
 }
+
 /**
  * Get handle for Anvato Settings class
  *
  * return object
  */
-function Anvato_Settings() {
+function Anvato_Settings()
+{
 	return Anvato_Settings::instance();
 }
+
 add_action( 'after_setup_theme', 'Anvato_Settings' );
 
 endif; // if not class "Anvato_Settings" exists
