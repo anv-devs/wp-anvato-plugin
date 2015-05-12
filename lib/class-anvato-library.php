@@ -135,6 +135,19 @@ class Anvato_Library {
 			$params['page_no'] = (int) $args['page_no'];
 		}
 		
+		if ( isset( $args['category_id'] ) ) {
+			$params['filter_by'][] = 'category_id';
+			$params['filter_cond'][] = 'eq';
+			$params['filter_value'][] = rawurlencode( sanitize_text_field( $args['category_id'] ) );
+		}
+
+		if ( isset( $args['video_id'] ) ) {
+			$params['filter_by'][] = 'video_id';
+			$params['filter_cond'][] = 'eq';
+			$params['filter_value'][] = rawurlencode( sanitize_text_field( $args['video_id'] ) );
+		}
+
+
 		return $params;
 	}
 
