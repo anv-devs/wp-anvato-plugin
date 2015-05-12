@@ -113,6 +113,8 @@ class Anvato_Library {
 	 * 		@type string $lk video title search keyword.
 	 * 		@type string $exp_date Used for video search, if set result includes videos that expire later than this date.
 	 * 		@type int $page_no page offset, starting with 1.
+	 * 		@type int $category_id MCP API filter for video list. Only videos with this category id will be returned.
+	 * 		@type int $video_id MCP API filter for video list. Only video with this video id will be returned.
 	 * }
 	 * @return array.
 	 */
