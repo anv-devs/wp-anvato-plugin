@@ -310,7 +310,7 @@ class Anvato_Settings {
 			return 0;
 		}
 
-		$result_response = wp_remote_get( "http://{$autoconfigkey_decoded['b']}.s3.amazonaws.com/wordpress/conf/{$autoconfigkey_decoded['k']}" );
+		$result_response = wp_safe_remote_get( "http://{$autoconfigkey_decoded['b']}.s3.amazonaws.com/wordpress/conf/{$autoconfigkey_decoded['k']}" );
 
 		// We don't need transient, since this will not be used often.
 		if ( is_wp_error( $result_response ) ) {
@@ -352,7 +352,7 @@ class Anvato_Settings {
 		reset( $this->plugin_settings_tabs ); // reset array pointer
 		$active_tab = key( $this->plugin_settings_tabs );
 		if ( !empty( $_GET['tab'] ) ) {
-			$active_tab = $_GET['tab'];
+			$active_tab = sanitize_text_field( $_GET['tab'] );
 		}
 
 		?>
@@ -676,7 +676,7 @@ class Anvato_Callbacks {
 			// Insert option for "Settings" before other links for Anvato Plugin
 			array_unshift(
 				$links, 
-				'<a href="' . esc_url( admin_url( 'options-general.php?page=' . ANVATO_DOMAIN_SLUG ) ) . '">' . __( 'Settings', ANVATO_DOMAIN_SLUG ) . '</a>'
+				'<a href="' . esc_url( admin_url( 'options-general.php?page=' . ANVATO_DOMAIN_SLUG ) ) . '">' . esc_html__( 'Settings', ANVATO_DOMAIN_SLUG ) . '</a>'
 			);
 		}
 		return $links;
