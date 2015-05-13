@@ -310,7 +310,7 @@ class Anvato_Settings {
 			return 0;
 		}
 
-		$result_response = wp_remote_get( "http://{$autoconfigkey_decoded['b']}.s3.amazonaws.com/wordpress/conf/{$autoconfigkey_decoded['k']}" );
+		$result_response = wp_safe_remote_get( "http://{$autoconfigkey_decoded['b']}.s3.amazonaws.com/wordpress/conf/{$autoconfigkey_decoded['k']}" );
 
 		// We don't need transient, since this will not be used often.
 		if ( is_wp_error( $result_response ) ) {
