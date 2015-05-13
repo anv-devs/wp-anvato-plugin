@@ -676,7 +676,7 @@ class Anvato_Callbacks {
 			// Insert option for "Settings" before other links for Anvato Plugin
 			array_unshift(
 				$links, 
-				'<a href="' . esc_url( admin_url( 'options-general.php?page=' . ANVATO_DOMAIN_SLUG ) ) . '">' . __( 'Settings', ANVATO_DOMAIN_SLUG ) . '</a>'
+				'<a href="' . esc_url( admin_url( 'options-general.php?page=' . ANVATO_DOMAIN_SLUG ) ) . '">' . esc_html__( 'Settings', ANVATO_DOMAIN_SLUG ) . '</a>'
 			);
 		}
 		return $links;
