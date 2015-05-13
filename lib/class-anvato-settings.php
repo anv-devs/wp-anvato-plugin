@@ -352,7 +352,7 @@ class Anvato_Settings {
 		reset( $this->plugin_settings_tabs ); // reset array pointer
 		$active_tab = key( $this->plugin_settings_tabs );
 		if ( !empty( $_GET['tab'] ) ) {
-			$active_tab = $_GET['tab'];
+			$active_tab = sanitize_text_field( $_GET['tab'] );
 		}
 
 		?>
