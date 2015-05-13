@@ -205,7 +205,7 @@ class Anvato_Settings {
 		if ( !is_admin() ) return;
 
 		wp_enqueue_script(
-			'anvato-anvato-js',
+			'anvato-common-js',
 			ANVATO_URL . 'lib/common.js', 
 			array('jquery'), 
 			'0.1.5'
