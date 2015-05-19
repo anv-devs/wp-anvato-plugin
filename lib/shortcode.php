@@ -32,14 +32,6 @@ function anvato_shortcode($attr) {
 		'anvplayer'
 	);
 
-	// set "size type" from settings, if one is not already provided
-	if ( substr($json['height'], -1) !== '%' && substr($json['height'], -2) !== 'px' ) {
-		$json['height'] = $json['height'] . $player['height_type'];
-	}
-	if ( substr($json['width'], -1) !== '%' && substr($json['width'], -2) !== 'px' ) {
-		$json['width'] = $json['width'] . $player['width_type'];
-	}
-
 	$video_ids = explode( ",", $json["video"] );
 	if ( sizeof( $video_ids ) > 1 ) {
 		unset( $json["video"] );
