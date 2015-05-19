@@ -22,8 +22,8 @@ function anvato_shortcode($attr) {
 	$json = shortcode_atts(
 		array(
 			'mcp' => $mcp['mcp']['id'],
-			'width' => $player['width'],
-			'height' => $player['height'],
+			'width' => $player['width'] . $player['height_type'],
+			'height' => $player['height'] . $player['width_type'],
 			'video' => null,
 			'ext_id' => null,
 			'autoplay' => false
@@ -31,9 +31,6 @@ function anvato_shortcode($attr) {
 		$attr, 
 		'anvplayer'
 	);
-	
-	$json['height'] = $json['height'] . $player['height_type'];
-	$json['width'] = $json['width'] . $player['width_type'];
 
 	$video_ids = explode( ",", $json["video"] );
 	if ( sizeof( $video_ids ) > 1 ) {
