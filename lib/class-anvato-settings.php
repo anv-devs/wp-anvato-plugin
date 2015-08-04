@@ -107,8 +107,13 @@ class Anvato_Settings {
 				'fields' => array(
 					array( 
 						'id' => 'heartbeat_account_id', 
-						'title' => 'Account ID:',
-					),
+						'title' => 'Account Info:',
+						'callback' => array( 'Anvato_Form_Fields', 'textarea' ), 
+						'args' => array(
+							'rows' => 2,
+							'cols' => 48,
+							'cs_class' => ''
+					)),
 					array( 
 						'id' => 'heartbeat_publisher_id', 
 						'title' => 'Publisher ID:',
@@ -636,11 +641,27 @@ class Anvato_Form_Fields {
 		if ( empty( $args['name'] ) ) {
 			return;
 		}
-	
+
+		$rows = 15;
+		if(isset($args['rows']) && (int)$args['rows'] > 0)	
+		{
+			$rows = (int)$args['rows'];
+		}
+		
+		$cols = '';
+		if(isset($args['cols']) && (int)$args['cols'] > 0)
+		{
+			$cols = ' cols="'.(int)$args['cols'].'"';
+		}
+		
+		$cs_class="large-text code";		
+		if(isset($args['cs_class']))
+		{
+			$cs_class = $args['cs_class'];
+		}
+		
 		printf(
-			'<textarea name="%s" class="large-text code" rows="15">%s</textarea>', 
-			esc_attr( $args['name'] ),
-			esc_attr( $args['value'] )
+			'<textarea name="%s" class="'.$cs_class.'" rows="'.$rows.'"'.$cols.'>%s</textarea>', esc_attr($args['name']), esc_attr($args['value'])
 		);
 	}
 

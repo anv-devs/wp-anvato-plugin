@@ -116,6 +116,7 @@ class Anvato_Library {
 	 * 		@type int $category_id MCP API filter for video list. Only videos with this category id will be returned.
 	 * 		@type int $video_id MCP API filter for video list. Only video with this video id will be returned.
 	 * 		@type int #program_id MCP API filter for videos in a program. Only videos with this program id will be returned
+	 * 		@type bool $published_only MCP API filter for video list. Only published videos will be returned.
 	 * }
 	 * @return array.
 	 */
@@ -156,6 +157,11 @@ class Anvato_Library {
 			$params['filter_value'][] = rawurlencode( sanitize_text_field( $args['program_id'] ) );
 		}
 
+		if ( isset( $args['published_only'] ) && $args['published_only'] ) {
+			$params['filter_by'][] = 'published';
+			$params['filter_cond'][] = 'eq';
+			$params['filter_value'][] = 'true';
+		}
 
 		return $params;
 	}
@@ -294,6 +300,10 @@ class Anvato_Library {
 				$this->selected_station = $ow_item;
 				break;
 			}
+		}
+
+		if($api_method == 'list_videos') {
+			$args['published_only'] = true;
 		}
 
 		$this->xml_body = str_replace( "%API_METHOD%", $api_method, $this->xml_body );

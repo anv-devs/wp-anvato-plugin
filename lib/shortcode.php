@@ -97,6 +97,13 @@ function anvato_shortcode($attr) {
 			}
 		}
 	}
+	
+	//Special consideration for heartbeat analytics
+	$account_obj = json_decode($analytics['heartbeat_account_id']);
+	if(is_object($account_obj))
+	{
+		$json['plugins']['heartbeat']['account'] = $account_obj;
+	}
 
 	// Set the DFP Ad Tag, which can also be overridden
 	if ( !empty( $monetization['advanced_targeting'] ) ) {
