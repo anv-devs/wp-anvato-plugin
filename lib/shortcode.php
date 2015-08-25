@@ -86,7 +86,8 @@ function anvato_shortcode($attr) {
 			'customTrackingServer' => 'heartbeat_cstm_tracking_server',
 		),
 		"comscore" => array(
-			'clientId' => 'comscore_client_id'
+			'clientId' => 'comscore_client_id',
+			'c3' => 'comscore_c3'
 		)
 	);
 

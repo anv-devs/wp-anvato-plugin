@@ -146,6 +146,10 @@ class Anvato_Settings {
 						'id' => 'comscore_client_id', 
 						'title' => 'Client ID:',
 					),
+					array( 
+						'id' => 'comscore_c3', 
+						'title' => 'C3 Value:',
+					)
 				),
 			),
 		),
