@@ -115,6 +115,7 @@ class Anvato_Library {
 	 * 		@type int $page_no page offset, starting with 1.
 	 * 		@type int $category_id MCP API filter for video list. Only videos with this category id will be returned.
 	 * 		@type int $video_id MCP API filter for video list. Only video with this video id will be returned.
+	 * 		@type int #program_id MCP API filter for videos in a program. Only videos with this program id will be returned
 	 * 		@type bool $published_only MCP API filter for video list. Only published videos will be returned.
 	 * }
 	 * @return array.
@@ -148,6 +149,12 @@ class Anvato_Library {
 			$params['filter_by'][] = 'video_id';
 			$params['filter_cond'][] = 'eq';
 			$params['filter_value'][] = rawurlencode( sanitize_text_field( $args['video_id'] ) );
+		}
+
+		if ( isset( $args['program_id'] ) ) {
+			$params['filter_by'][] = 'program_id';
+			$params['filter_cond'][] = 'eq';
+			$params['filter_value'][] = rawurlencode( sanitize_text_field( $args['program_id'] ) );
 		}
 
 		if ( isset( $args['published_only'] ) && $args['published_only'] ) {
@@ -232,7 +239,7 @@ class Anvato_Library {
 		$url = $this->build_request_url($params, time());
 		$args = array('body' => $this->xml_body);
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-			$response = vip_safe_wp_remote_get( esc_url_raw( $url ), false, 3, 1, 20, $args );
+			$response = vip_safe_wp_remote_get( esc_url_raw( $url ), false, 3, 3, 20, $args );
 		} else {
 			$response = wp_remote_get( esc_url_raw( $url ), $args );
 		}
