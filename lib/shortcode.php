@@ -26,6 +26,7 @@ function anvato_shortcode($attr) {
 			'height' => $player['height'] . $player['width_type'],
 			'video' => null,
 			'ext_id' => null,
+			'sharelink' => null,
 			'autoplay' => false
 		),
 		$attr, 
@@ -56,6 +57,14 @@ function anvato_shortcode($attr) {
 	
 	unset($json["ext_id"]);
 	
+	if ( !empty($json['sharelink']) ) {
+		$json['shareLink'] = $json['sharelink'];
+	} else if ( !empty($player['default_share_link']) ) {
+		$json['shareLink'] = $player['default_share_link'];
+	}
+
+	unset($json['sharelink']);
+
 	if ( !empty( $mcp['mcp']['tkx_key'] ) ) {
 		$json['accessKey'] = $mcp['mcp']['tkx_key'];
 		$json['accessControl']['preview'] = false;

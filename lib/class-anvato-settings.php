@@ -46,6 +46,10 @@ class Anvato_Settings {
 						'title' => 'Player URL*:',
 					),
 					array(
+							'id' => 'default_share_link',
+							'title' => 'Default Share Link:',
+					),
+					array(
 						'id' => 'height', 
 						'title' => 'Height:', 
 						'args' => array(
@@ -665,7 +669,7 @@ class Anvato_Form_Fields {
 		}
 		
 		printf(
-			'<textarea name="%s" class="'.$cs_class.'" rows="'.$rows.'"'.$cols.'>%s</textarea>', esc_attr($args['name']), esc_attr($args['value'])
+			'<textarea name="%s" class="'.$cs_class.'" rows="'.$rows.'"'.$cols.'>%s</textarea>', esc_attr($args['name']), esc_textarea($args['value'])
 		);
 	}
 
