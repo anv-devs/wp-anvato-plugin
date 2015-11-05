@@ -669,7 +669,7 @@ class Anvato_Form_Fields {
 		}
 		
 		printf(
-			'<textarea name="%s" class="'.$cs_class.'" rows="'.$rows.'"'.$cols.'>%s</textarea>', esc_attr($args['name']), esc_textarea($args['value'])
+			'<textarea name="%s" class="'.esc_attr($cs_class).'" rows="'.esc_attr($rows).'"'.esc_attr($cols).'>%s</textarea>', esc_attr($args['name']), esc_textarea($args['value'])
 		);
 	}
 
