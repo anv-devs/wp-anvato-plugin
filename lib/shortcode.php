@@ -93,6 +93,7 @@ function anvato_shortcode($attr) {
 			'marketingCloudId' => 'heartbeat_marketing_id',
 			'trackingServer' => 'heartbeat_tracking_server',
 			'customTrackingServer' => 'heartbeat_cstm_tracking_server',
+			'version' => 'heartbeat_version'
 		),
 		"comscore" => array(
 			'clientId' => 'comscore_client_id',

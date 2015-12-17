@@ -138,6 +138,10 @@ class Anvato_Settings {
 						'id' => 'heartbeat_cstm_tracking_server', 
 						'title' => 'Custom Tracking Server:',
 					),
+					array(
+							'id' => 'heartbeat_version',
+							'title' => 'Version:',
+					),
 				),
 			),
 			// Comscore Analytics
