@@ -93,6 +93,7 @@ function anvato_shortcode($attr) {
 			'marketingCloudId' => 'heartbeat_marketing_id',
 			'trackingServer' => 'heartbeat_tracking_server',
 			'customTrackingServer' => 'heartbeat_cstm_tracking_server',
+			'chapterTracking'=>'chapter_tracking',
 			'version' => 'heartbeat_version'
 		),
 		"comscore" => array(
@@ -105,6 +106,8 @@ function anvato_shortcode($attr) {
 		foreach ( $plugin as $field => $var ) {
 			if ( !empty( $analytics[$var] ) ) {
 				$json['plugins'][$name][$field] = $analytics[$var];
+				if($field == 'chapterTracking')
+					$json['plugins'][$name][$field] = ($analytics[$var] == 'true' ? true : false);
 			}
 		}
 	}

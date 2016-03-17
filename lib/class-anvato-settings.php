@@ -142,6 +142,10 @@ class Anvato_Settings {
 							'id' => 'heartbeat_version',
 							'title' => 'Version:',
 					),
+					array(
+							'id' => 'chapter_tracking',
+							'title' => 'Chapter Tracking:',
+					),
 				),
 			),
 			// Comscore Analytics
