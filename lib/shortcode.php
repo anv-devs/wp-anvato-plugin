@@ -147,11 +147,58 @@ function anvato_shortcode($attr) {
 	if( isset( $json['video'] ) && is_string( $json['video'] ) && substr( $json['video'], 0, 1 ) === 'c' ) {
 		$json['androidIntentPlayer'] = 'true';
 	}
-
+	
+	// this is an amp experience
+	if (function_exists('is_amp_endpoint') && is_amp_endpoint()) {
+		
+		if(isset($json['video']))
+		{
+			$json['v'] = $json['video'];
+			unset($json['video']);
+		}
+		
+		if(isset($json['playlist']))
+		{
+			$json['pl'] = $json['playlist'];
+			unset($json['playlist']);
+		}
+		
+		$json['m'] = $json['mcp'];
+		
+		unset($json['mcp']);
+		unset($json['width']);
+		unset($json['height']);
+		unset($json['pInstance']);
+		
+		$json['p'] = 'default';
+		$json['html5'] = true;
+		
+	}
+	$json['html5'] = true;
 	# Allow theme/plugins to filter the JSON before outputting
 	$json = apply_filters( 'anvato_anvp_json', $json, $attr );
 
 	$format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
+	
+	// this is an amp experience
+	if (function_exists('is_amp_endpoint') && is_amp_endpoint())
+	{
+		$format = "<iframe width='%s' height='%s' sandbox='%s' layout='%s'
+				scrolling='%s' frameborder='%s' allowfullscreen src='%s'>
+				</iframe>";
+		
+		$src =  "https://w3.cdn.anvato.net/player/prod/anvload.html?key=".base64_encode(json_encode($json));
+		
+		return sprintf(
+				$format,
+				esc_attr( $player['width_type']=='px'?$player['width'] : '640' ),esc_attr($player['height_type']=='px'?$player['height']: '360'),
+				esc_attr("allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"),
+				esc_attr("resposive"),
+				esc_attr("no"),
+				esc_attr("0"),
+				$src
+		);
+	}
 
 	return sprintf(
 		$format, 
