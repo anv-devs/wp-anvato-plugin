@@ -88,7 +88,7 @@ class MEXP_Anvato_Service extends MEXP_Service
 			return false;
 		}
 
-		$response = call_user_method($callback, $this, $results);
+		$response = call_user_func(array($this, $callback), $results);
 
 		return $response;
 	}
