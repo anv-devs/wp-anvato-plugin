@@ -237,7 +237,7 @@ class Anvato_Library {
 		}
 
 		$url = $this->build_request_url($params, time());
-		$args = array('body' => $this->xml_body);
+		$args = array('body' => $this->xml_body, 'timeout' => 30);
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
 			$response = vip_safe_wp_remote_get( esc_url_raw( $url ), false, 3, 3, 20, $args );
 		} else {
