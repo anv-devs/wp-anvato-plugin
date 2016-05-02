@@ -196,7 +196,7 @@ function anvato_shortcode($attr) {
 				esc_attr("resposive"),
 				esc_attr("no"),
 				esc_attr("0"),
-				$src
+				esc_url( $src )
 		);
 	}
 
