@@ -149,7 +149,7 @@ function anvato_shortcode($attr) {
 	}
 	
 	// this is an amp experience
-	if (function_exists('is_amp_endpoint') && is_amp_endpoint()) {
+	if ((function_exists('is_amp_endpoint') && is_amp_endpoint()) || has_action('simple_fb_reformat_post_content')) {
 		
 		if(isset($json['video']))
 		{
@@ -181,7 +181,7 @@ function anvato_shortcode($attr) {
 	$format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
 	
 	// this is an amp experience
-	if (function_exists('is_amp_endpoint') && is_amp_endpoint())
+	if ((function_exists('is_amp_endpoint') && is_amp_endpoint() ) || has_action('simple_fb_reformat_post_content') )
 	{
 		$format = "<iframe width='%s' height='%s' sandbox='%s' layout='%s'
 				scrolling='%s' frameborder='%s' allowfullscreen src='%s'>
