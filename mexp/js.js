@@ -65,7 +65,7 @@ media.controller.MEXP = media.controller.State.extend({
 					video_ids.push(model.get('id'));
 				}else if(jQuery('#dfp_flag_'+model.get('id')).attr('checked'))
 				{
-					urls = ['[anvplayer video="' + model.get('id') + '"  no_pr="true" ]'];
+					urls = ['[anvplayer video="' + model.get('id') + '"  no_pr="true" station="'+meta['station']+'" ]'];
 				} else
 				{
 					urls.push(model.get('url'));
@@ -77,7 +77,7 @@ media.controller.MEXP = media.controller.State.extend({
 		});
 		if(video_ids.length)
 		{
-			urls = ['[anvplayer video="' + video_ids.join(',') + '" ]'];
+			urls = ['[anvplayer video="' + video_ids.join(',') + '" station="'+meta['station']+'"]'];
 		}
 		selection.reset();
 
@@ -211,12 +211,19 @@ media.view.MEXP.prototype.fetchedSuccess = function( response )
 
 }
 
-function anv_preview(mcp_id, video_id, type)
+function anv_preview(mcp_id, video_id, type, accesskey)
 {
 	var ptype = type === 'video' || type === 'live' ? 'video' : 'playlist';
 	var player_js_url = "http://qa.up.anv.bz/dev/scripts/anvload.js";
 	var script = jQuery("<script src='"+player_js_url+"'></script>");
-	script.attr("data-anvp", '{\"mcp\":\"' + mcp_id + '\", \"pInstance\": \"anv_preview_cont\", \"'+ptype+'\":\"' + video_id + '\", \"autoplay\": \"true\"}');
+	if(accesskey)
+	{
+		script.attr("data-anvp", '{\"mcp\":\"' + mcp_id + '\", \"accessKey\":\"'+ accesskey +'\", \"pInstance\": \"anv_preview_cont\", \"'+ptype+'\":\"' + video_id + '\", \"autoplay\": \"true\", \"token\":\"default\"}');
+	}
+	else
+	{
+		script.attr("data-anvp", '{\"mcp\":\"' + mcp_id + '\", \"pInstance\": \"anv_preview_cont\", \"'+ptype+'\":\"' + video_id + '\", \"autoplay\": \"true\"}');
+	}
 
 	var div = jQuery("<div class='anv_preview'><div id=\"anv_preview_cont\"></div><a class=\"anv_preview_close\" href='Javascript://' onclick=\"anv_preview_close()\"></a></div>");
 	div.append(script).insertBefore('.mexp-content-wp_anvato > .mexp-items');

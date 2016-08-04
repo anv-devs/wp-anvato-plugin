@@ -25,6 +25,7 @@ function anvato_shortcode($attr) {
 			'width' => $player['width'] . $player['height_type'],
 			'height' => $player['height'] . $player['width_type'],
 			'video' => null,
+			'station'=>null,
 			'ext_id' => null,
 			'sharelink' => null,
 			'autoplay' => false
@@ -112,6 +113,16 @@ function anvato_shortcode($attr) {
 		}
 	}
 	
+	foreach($mcp['owners'] as $owner) {
+		if($owner['id'] == $json['station'] && !empty($owner['access_key']))
+		{
+			$json['accessKey'] = $owner['access_key'];
+			$json['token'] = 'default';
+		}
+	}
+	
+	unset($json['station']);
+	
 	//Special consideration for heartbeat analytics
 	$account_obj = json_decode($analytics['heartbeat_account_id']);
 	if(is_object($account_obj))
@@ -174,7 +185,7 @@ function anvato_shortcode($attr) {
 		$json['html5'] = true;
 		
 	}
-	$json['html5'] = true;
+	
 	# Allow theme/plugins to filter the JSON before outputting
 	$json = apply_filters( 'anvato_anvp_json', $json, $attr );
 

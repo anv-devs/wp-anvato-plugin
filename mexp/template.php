@@ -32,7 +32,7 @@ class MEXP_Anvato_Template extends MEXP_Template
 					class="thickbox">
 					<img src="<?php echo esc_url(ANVATO_URL . 'img/play.png') ?>"
 						onclick="anv_preview('<?php echo $this->anv_settings['mcp']['id'] ?>',
-						'{{ data.id }}', '{{ data.meta.type }}');"
+						'{{ data.id }}', '{{ data.meta.type }}', '{{data.meta.accesskey}}');"
 					/>
 					<# if ( data.meta.duration  ) { #>
 						<span>{{ data.meta.duration }}</span><# 
