@@ -204,7 +204,7 @@ function anvato_shortcode($attr) {
 				$format,
 				esc_attr( $player['width_type']=='px'?$player['width'] : '640' ),esc_attr($player['height_type']=='px'?$player['height']: '360'),
 				esc_attr("allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"),
-				esc_attr("resposive"),
+				esc_attr("responsive"),
 				esc_attr("no"),
 				esc_attr("0"),
 				esc_url( $src )
