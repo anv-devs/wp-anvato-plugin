@@ -27,7 +27,8 @@ function anvato_shortcode($attr) {
 			'video' => null,
 			'ext_id' => null,
 			'sharelink' => null,
-			'autoplay' => false
+			'autoplay' => false,
+			'thumbnail_image' => '',
 		),
 		$attr, 
 		'anvplayer'
@@ -174,6 +175,7 @@ function anvato_shortcode($attr) {
 		$json['html5'] = true;
 		
 	}
+
 	// $json['html5'] = true; // Removed because it breaks live streams
 
 	# Allow theme/plugins to filter the JSON before outputting
@@ -202,6 +204,15 @@ function anvato_shortcode($attr) {
 		*/
 		$iframe_tag_name = 'iframe';
 		$iframe_inner = '';
+
+		// Specifically for Google AMP
+		if ( function_exists('is_amp_endpoint') && is_amp_endpoint() ) {
+			$iframe_tag_name = 'amp-iframe'; // change the tag name
+
+			if ( $json['thumbnail_image'] ) { // placeholder for amp video
+				$iframe_inner .= '<amp-img layout="fill" src="" placeholder></amp-img>';
+			}
+		}
 
 		// Construct the element
 		$iframe_html =
