@@ -91,6 +91,15 @@ class Anvato_Library {
 			)
 		);
 	}
+	
+	public function get_sel_station() {
+		if(empty($this->selected_station)){
+			return null;
+		}
+		
+		return $this->selected_station;
+	}
+	
 
 	/**
 	 * Create the unique signature for a request.

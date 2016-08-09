@@ -33,6 +33,11 @@ class MEXP_Anvato_Service extends MEXP_Service
 			array('jquery', 'mexp'), '0.1.5'
 		);
 	}
+	
+	public function get_station()
+	{
+		return Anvato_Library()->get_sel_station();
+	}
 
 	/**
 	 * Handles the AJAX request for videos and returns an appropriate response.
@@ -96,6 +101,7 @@ class MEXP_Anvato_Service extends MEXP_Service
 	function generate_mexp_response_for_vod($results) 
 	{
 		$response = new MEXP_Response();
+		$station = $this->get_station();
 		foreach ($results as $video)
 		{
 			$item = new MEXP_Response_Item();
@@ -106,6 +112,8 @@ class MEXP_Anvato_Service extends MEXP_Service
 			$item->add_meta("duration", sanitize_text_field((string) $video->duration));
 			$item->add_meta("category", sanitize_text_field((string) $video->categories->primary_category));
 			$item->add_meta("type", "video");
+			$item->add_meta("accesskey",$station['access_key']);
+			$item->add_meta("station", $station['id']);
 			$item->set_date(strtotime(sanitize_text_field((string) $video->ts_added)));
 			$item->set_date_format("M j, Y, g:i a");
 			$item->set_id(intval((string) $video->upload_id));
@@ -126,6 +134,8 @@ class MEXP_Anvato_Service extends MEXP_Service
 	function generate_mexp_response_for_playlist($results) 
 	{
 		$response = new MEXP_Response();
+		$station = $this->get_station();
+		
 		foreach ($results as $playlist)
 		{
 			$item = new MEXP_Response_Item();
@@ -135,6 +145,8 @@ class MEXP_Anvato_Service extends MEXP_Service
 			$item->add_meta("description", sanitize_text_field($description));
 			$item->add_meta("video_count", sanitize_text_field((string) $playlist->item_count . "" ) );
 			$item->add_meta("type", "playlist");
+			$item->add_meta("accesskey",$station['access_key']);
+			$item->add_meta("station", $station['id']);
 			$item->set_id(intval((string) $playlist->playlist_id));
 			
 			$item->url = $this->generate_shortcode((string) $playlist->playlist_id, 'playlist');
@@ -153,6 +165,7 @@ class MEXP_Anvato_Service extends MEXP_Service
 	function generate_mexp_response_for_channel($results) 
 	{
 		$response = new MEXP_Response();
+		$station = $this->get_station();
 		
 		foreach ($results as $channel)
 		{			
@@ -160,6 +173,8 @@ class MEXP_Anvato_Service extends MEXP_Service
 			$item->set_content(sanitize_text_field((string) $channel->channel_name) );
 			$item->add_meta("category", "Live Stream");
 			$item->add_meta("embed_id", "{$channel->embed_id}");
+			$item->add_meta("accesskey",$station['access_key']);
+			$item->add_meta("station", $station['id']);
 
 			$icon_url = (string) $channel->icon_url;
 			$icon_url = $icon_url === "" ? ANVATO_URL . 'img/channel_icon.png' : $icon_url;
@@ -190,6 +205,8 @@ class MEXP_Anvato_Service extends MEXP_Service
 					$item->add_meta("category", "Monetized Live Stream");
 					$item->add_meta("embed_id", "{$mchannel->embed_id}");
 					$item->add_meta("type", "live");
+					$item->add_meta("accesskey",$station['access_key']);
+					$item->add_meta("station", $station['id']);
 					$item->set_id( (string) $mchannel->embed_id );
 					$icon_url = (string) $channel->icon_url;
 					$icon_url = $icon_url === "" ? ANVATO_URL . 'img/channel_icon.png' : $icon_url;
@@ -214,7 +231,15 @@ class MEXP_Anvato_Service extends MEXP_Service
 	 */
 	private function generate_shortcode( $video_id, $type='vod' )
 	{
-		return '[anvplayer '.($type==='vod'?'video':'playlist').'="' . esc_attr($video_id) . '"]';
+		$station = $this->get_station();
+		
+		$shortcode = '[anvplayer '.($type==='vod'?'video':'playlist').'="' . esc_attr($video_id) . '"';
+		if(!empty($station)){
+			$shortcode .= ' station="'.esc_attr($station['id']). '"';
+		}
+		$shortcode .=']';
+		
+		return $shortcode;
 	}
 
 	/**
