@@ -221,7 +221,7 @@ function anvato_shortcode($attr) {
 			$iframe_tag_name = 'amp-iframe'; // change the tag name
 
 			if ( !empty( $json['thumbnail_image'] ) ) { // placeholder for amp video
-				$iframe_inner .= '<amp-img layout="fill" src="" placeholder></amp-img>';
+				$iframe_inner .= '<amp-img layout="fill" src="' . esc_attr( $json['thumbnail_image'] ) . '" placeholder></amp-img>';
 			}
 		}
 
