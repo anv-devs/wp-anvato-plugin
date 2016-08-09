@@ -231,7 +231,7 @@ function anvato_shortcode($attr) {
 				'src="' . esc_url( $iframe_src ) . '" ' .
 				'width="' . esc_attr( $iframe_width ) . '" height="' . esc_attr( $iframe_height ) . '" ' . 
 				'sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" ' .
-				'allowfullscreen' .
+				'allowfullscreen ' .
 				'layout="responsive" ' .
 				'scrolling="no" ' .
 				'frameborder="0" ' .
