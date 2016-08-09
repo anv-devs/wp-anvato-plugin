@@ -174,32 +174,55 @@ function anvato_shortcode($attr) {
 		$json['html5'] = true;
 		
 	}
-	$json['html5'] = true;
+	// $json['html5'] = true; // Removed because it breaks live streams
+
 	# Allow theme/plugins to filter the JSON before outputting
 	$json = apply_filters( 'anvato_anvp_json', $json, $attr );
-
-	$format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
 	
-	// this is an amp experience
-	if ((function_exists('is_amp_endpoint') && is_amp_endpoint() ) || has_action('simple_fb_reformat_post_content') )
-	{
-		$format = "<iframe width='%s' height='%s' sandbox='%s' layout='%s'
-				scrolling='%s' frameborder='%s' allowfullscreen src='%s'>
-				</iframe>";
-		
-		$src =  "https://w3.cdn.anvato.net/player/prod/anvload.html?key=".base64_encode(json_encode($json));
-		
-		return sprintf(
-				$format,
-				esc_attr( $player['width_type']=='px'?$player['width'] : '640' ),esc_attr($player['height_type']=='px'?$player['height']: '360'),
-				esc_attr("allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"),
-				esc_attr("resposive"),
-				esc_attr("no"),
-				esc_attr("0"),
-				esc_url( $src )
-		);
+	// InstantArticles handle (AMP, Facebook Instant Articles etc)
+	if (
+		( function_exists('is_amp_endpoint') && is_amp_endpoint() ) // amp detection
+		|| has_action('simple_fb_reformat_post_content') // facebook instant articles detection
+	) {
+
+		$iframe_src = 'https://w3.cdn.anvato.net/player/prod/anvload.html?key=' . 
+			base64_encode( json_encode( $json ) );
+		$iframe_width = 640;
+		if ( !empty( $player['width'] ) && 'px' === $player['width_type'] ) {
+			$iframe_width = $player['width'];
+		}
+		$iframe_height = 360;
+		if ( !empty( $player['height'] ) && 'px' === $player['height_type'] ) {
+			$iframe_height = $player['height'];
+		}
+
+		/*
+			Different tag names are used for different InstantArticles platforms
+			Ex: amp-iframe is used for Google AMP
+		*/
+		$iframe_tag_name = 'iframe';
+		$iframe_inner = '';
+
+		// Construct the element
+		$iframe_html =
+			'<' . esc_attr( $iframe_tag_name ) . ' ' .
+				'src="' . esc_url( $iframe_src ) . '" ' .
+				'width="' . esc_attr( $iframe_width ) . '" height="' . esc_attr( $iframe_height ) . '" ' . 
+				'sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" ' .
+				'allowfullscreen' .
+				'layout="responsive" ' .
+				'scrolling="no" ' .
+				'frameborder="0" ' .
+			'>' .
+				$iframe_inner .
+			'</' . esc_attr( $iframe_tag_name ) . '>';
+
+		return $iframe_html;
+
 	}
 
+	// Regular player
+	$format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
 	return sprintf(
 		$format, 
 		esc_attr( $json['pInstance'] ), 
