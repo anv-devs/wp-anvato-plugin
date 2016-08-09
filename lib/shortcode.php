@@ -220,7 +220,7 @@ function anvato_shortcode($attr) {
 		if ( function_exists('is_amp_endpoint') && is_amp_endpoint() ) {
 			$iframe_tag_name = 'amp-iframe'; // change the tag name
 
-			if ( $json['thumbnail_image'] ) { // placeholder for amp video
+			if ( !empty( $json['thumbnail_image'] ) ) { // placeholder for amp video
 				$iframe_inner .= '<amp-img layout="fill" src="" placeholder></amp-img>';
 			}
 		}
