@@ -29,7 +29,6 @@ function anvato_shortcode($attr) {
 			'ext_id' => null,
 			'sharelink' => null,
 			'autoplay' => false,
-			'thumbnail_image' => '',
 		),
 		$attr, 
 		'anvplayer'
