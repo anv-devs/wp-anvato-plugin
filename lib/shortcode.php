@@ -192,11 +192,20 @@ function anvato_shortcode($attr) {
 	# Allow theme/plugins to filter the JSON before outputting
 	$json = apply_filters( 'anvato_anvp_json', $json, $attr );
 
+	$is_instant_articles_enabled = false;
+	// Detect support for Google AMP
+	if ( function_exists( 'is_amp_endpoint' ) && is_amp_endpoint() ) {
+		$is_instant_articles_enabled = true;
+		$is_amp_articles_enabled = true;
+	}
+	// Detect support for Facebook Instant Articles
+	if ( has_action('simple_fb_reformat_post_content') || ( defined('INSTANT_ARTICLES_SLUG') && INSTANT_ARTICLES_SLUG ) ) {
+		$is_instant_articles_enabled = true;
+		$is_fia_articles_enabled = true;
+	}
+
 	// InstantArticles handle (AMP, Facebook Instant Articles etc)
-	if (
-		( function_exists('is_amp_endpoint') && is_amp_endpoint() ) // amp detection
-		|| has_action('simple_fb_reformat_post_content') // facebook instant articles detection
-	) {
+	if ( $is_instant_articles_enabled ) {
 
 		$iframe_src = 'https://w3.cdn.anvato.net/player/prod/anvload.html?key=' . 
 			base64_encode( json_encode( $json ) );
@@ -209,25 +218,11 @@ function anvato_shortcode($attr) {
 			$iframe_height = $player['height'];
 		}
 
-		/*
-			Different tag names are used for different InstantArticles platforms
-			Ex: amp-iframe is used for Google AMP
-		*/
-		$iframe_tag_name = 'iframe';
-		$iframe_inner = '';
-
-		// Specifically for Google AMP
-		if ( function_exists('is_amp_endpoint') && is_amp_endpoint() ) {
-			$iframe_tag_name = 'amp-iframe'; // change the tag name
-
-			if ( !empty( $json['thumbnail_image'] ) ) { // placeholder for amp video
-				$iframe_inner .= '<amp-img layout="fill" src="' . esc_attr( $json['thumbnail_image'] ) . '" placeholder></amp-img>';
-			}
-		}
+		$iframe_inner = ''; // placeholder for inner content of the iframe - placeholder etc
 
 		// Construct the element
 		$iframe_html =
-			'<' . esc_attr( $iframe_tag_name ) . ' ' .
+			'<iframe ' .
 				'src="' . esc_url( $iframe_src ) . '" ' .
 				'width="' . esc_attr( $iframe_width ) . '" height="' . esc_attr( $iframe_height ) . '" ' . 
 				'sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" ' .
@@ -237,7 +232,7 @@ function anvato_shortcode($attr) {
 				'frameborder="0" ' .
 			'>' .
 				$iframe_inner .
-			'</' . esc_attr( $iframe_tag_name ) . '>';
+			'</iframe>';
 
 		return $iframe_html;
 
