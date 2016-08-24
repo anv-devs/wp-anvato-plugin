@@ -5,12 +5,12 @@ global $anvato_player_index;
 $anvato_player_index = 0;
 
 /**
- * Implement the Anvato shortcode.
+ * Generate parameters (json) for Anvato Shortcode
  *
  * @param  array $attr Array of shortcode attributes
- * @return string       HTML to replace the shortcode
+ * @return array       List (json) of parameters
  */
-function anvato_shortcode($attr) {
+function anvato_shortcode_get_parameters( $attr ) {
 
 	global $anvato_player_index;
 	$mcp = Anvato_Settings()->get_mcp_options();
@@ -28,7 +28,7 @@ function anvato_shortcode($attr) {
 			'station'=>null,
 			'ext_id' => null,
 			'sharelink' => null,
-			'autoplay' => false
+			'autoplay' => false,
 		),
 		$attr, 
 		'anvplayer'
@@ -74,9 +74,6 @@ function anvato_shortcode($attr) {
 	$json['autoplay'] = ( 'true' == $json['autoplay'] );
 
 	$json['pInstance'] = 'p' . $anvato_player_index++;
-
-	// Set the player URL, which isn't part of the JSON but can be overridden
-	$player_url = !empty( $attr['player_url'] ) ? $attr['player_url'] : $player['player_url'];
 
 	// Avaliable values 
 	$plugin_map = array(
@@ -185,38 +182,40 @@ function anvato_shortcode($attr) {
 		$json['html5'] = true;
 		
 	}
-	
+
+	// $json['html5'] = true; // Removed because it breaks live streams
+
 	# Allow theme/plugins to filter the JSON before outputting
 	$json = apply_filters( 'anvato_anvp_json', $json, $attr );
 
-	$format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
-	
-	// this is an amp experience
-	if ((function_exists('is_amp_endpoint') && is_amp_endpoint() ) || has_action('simple_fb_reformat_post_content') )
-	{
-		$format = "<iframe width='%s' height='%s' sandbox='%s' layout='%s'
-				scrolling='%s' frameborder='%s' allowfullscreen src='%s'>
-				</iframe>";
-		
-		$src =  "https://w3.cdn.anvato.net/player/prod/anvload.html?key=".base64_encode(json_encode($json));
-		
-		return sprintf(
-				$format,
-				esc_attr( $player['width_type']=='px'?$player['width'] : '640' ),esc_attr($player['height_type']=='px'?$player['height']: '360'),
-				esc_attr("allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"),
-				esc_attr("responsive"),
-				esc_attr("no"),
-				esc_attr("0"),
-				esc_url( $src )
-		);
-	}
+	return array(
+		'json' => $json,
+		'player' => $player,
+	);
+}
 
+/**
+ * Implement the Anvato shortcode.
+ *
+ * @param  array $attr Array of shortcode attributes
+ * @return string       HTML to replace the shortcode
+ */
+function anvato_shortcode( $attr ) {
+
+	$parameters = anvato_shortcode_get_parameters( $attr );
+
+	// Set the player URL, which isn't part of the JSON but can be overridden
+	$player_url = !empty( $attr['player_url'] ) ? $attr['player_url'] : $parameters['player']['player_url'];
+
+	// Regular player
+	$format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
 	return sprintf(
 		$format, 
-		esc_attr( $json['pInstance'] ), 
-		esc_attr( json_encode( $json ) ), 
+		esc_attr( $parameters['json']['pInstance'] ), 
+		esc_attr( json_encode( $parameters['json'] ) ), 
 		esc_url( $player_url )
 	);
+
 }
 
 add_shortcode( 'anvplayer', 'anvato_shortcode' );
