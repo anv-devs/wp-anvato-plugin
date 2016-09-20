@@ -71,6 +71,9 @@ class ANVATO_AMP_Anvplayer_Embed_Handler extends AMP_Base_Embed_Handler {
 		// placeholder
 		if ( !empty( $args['placeholder_image_src'] )) {
 			$iframe_html .= '<amp-img layout="fill" src="' . esc_url( $json['placeholder_image_src'] ) . '" placeholder></amp-img>';
+		} else {
+			// default placeholder
+			$iframe_html .= '<div placeholder="" class="amp-wp-iframe-placeholder"></div>';
 		}
 
 		$iframe_html .= '</amp-iframe>';
