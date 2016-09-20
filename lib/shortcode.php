@@ -157,7 +157,10 @@ function anvato_shortcode_get_parameters( $attr ) {
 	}
 	
 	// this is an amp experience
-	if ((function_exists('is_amp_endpoint') && is_amp_endpoint()) || has_action('simple_fb_reformat_post_content')) {
+	if (
+		( function_exists( 'is_amp_endpoint' ) && is_amp_endpoint() ) || 
+		( defined( 'INSTANT_ARTICLES_SLUG' ) && $type == INSTANT_ARTICLES_SLUG )
+	) {
 		
 		if(isset($json['video']))
 		{
