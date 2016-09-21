@@ -40,3 +40,13 @@ if ( !is_admin() ) {
 } else {
 	require_once ANVATO_PATH . '/mexp/load.php';
 }
+
+// Facebook Instant Articles handler
+add_filter('feed_content_type', function($content_type, $type){
+    if (defined('INSTANT_ARTICLES_SLUG') && $type == INSTANT_ARTICLES_SLUG) {
+
+        require_once ANVATO_PATH . '/exports/fia-anvplayer-embed.php';
+
+    }
+    return $content_type;
+}, 10, 2 );
