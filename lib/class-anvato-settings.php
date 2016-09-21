@@ -49,6 +49,11 @@ class Anvato_Settings {
 							'id' => 'default_share_link',
 							'title' => 'Default Share Link:',
 					),
+
+					array(
+							'id' => 'title_visible',
+							'title' => 'Title Visible:',
+					),
 					array(
 						'id' => 'height', 
 						'title' => 'Height:', 
