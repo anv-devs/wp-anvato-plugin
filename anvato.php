@@ -40,3 +40,15 @@ if ( !is_admin() ) {
 } else {
 	require_once ANVATO_PATH . '/mexp/load.php';
 }
+
+// Google AMP filter handler
+add_action('amp_content_embed_handlers', function( $list_of_embeds ) {
+    if ( empty( $list_of_embeds) ) {
+        $list_of_embeds = array();
+    }
+
+    require_once( ANVATO_PATH . '/exports/class-amp-anvplayer-embed.php');
+    $list_of_embeds['ANVATO_AMP_Anvplayer_Embed_Handler'] = array();
+
+    return $list_of_embeds;
+});
