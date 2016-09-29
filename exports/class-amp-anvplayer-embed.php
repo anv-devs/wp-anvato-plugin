@@ -28,8 +28,7 @@ class ANVATO_AMP_Anvplayer_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$parameters = anvato_shortcode_get_parameters( $attr );
 
-		$iframe_src = 'https://w3.cdn.anvato.net/player/prod/anvload.html?key=' . 
-			base64_encode( json_encode( $parameters['json'] ) );
+		$iframe_src = 'https://w3.cdn.anvato.net/player/prod/anvload.html?key=' . base64_encode( json_encode( $parameters['json'] ) );
 
 		$iframe_width = 640;
 		if ( !empty( $parameters['player']['width'] ) && 'px' === $parameters['player']['width_type'] ) {
@@ -60,7 +59,7 @@ class ANVATO_AMP_Anvplayer_Embed_Handler extends AMP_Base_Embed_Handler {
 		$iframe_html =
 			'<amp-iframe ' .
 				'src="' . esc_url( $args['src'] ) . '" ' .
-				'width="' . esc_attr( $args['width'] ) . '" height="' . esc_attr( $args['height'] ) . '" ' . 
+				'width="' . esc_attr( $args['width'] ) . '" height="' . esc_attr( $args['height'] ) . '" ' .
 				'sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" ' .
 				'allowfullscreen ' .
 				'layout="responsive" ' .
