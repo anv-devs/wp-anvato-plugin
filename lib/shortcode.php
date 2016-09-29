@@ -161,7 +161,7 @@ function anvato_shortcode_get_parameters( $attr ) {
 	}
 	
 	// this is an amp experience
-	if ((function_exists('is_amp_endpoint') && is_amp_endpoint()) || has_action('simple_fb_reformat_post_content')) {
+	if ( (function_exists('is_amp_endpoint') && is_amp_endpoint()) || (defined( 'INSTANT_ARTICLES_SLUG' ) && $type == INSTANT_ARTICLES_SLUG) ) {
 		
 		if(isset($json['video']))
 		{
@@ -186,8 +186,6 @@ function anvato_shortcode_get_parameters( $attr ) {
 		$json['html5'] = true;
 		
 	}
-
-	// $json['html5'] = true; // Removed because it breaks live streams
 
 	# Allow theme/plugins to filter the JSON before outputting
 	$json = apply_filters( 'anvato_anvp_json', $json, $attr );
@@ -215,8 +213,8 @@ function anvato_shortcode( $attr ) {
 	$format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
 	return sprintf(
 		$format, 
-		esc_attr( $parameters['json']['pInstance'] ), 
-		esc_attr( json_encode( $parameters['json'] ) ), 
+		esc_attr( $parameters['json']['pInstance'] ),
+		esc_attr( json_encode( $parameters['json'] ) ),
 		esc_url( $player_url )
 	);
 

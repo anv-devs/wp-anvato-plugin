@@ -46,9 +46,17 @@ add_action('amp_content_embed_handlers', function( $list_of_embeds ) {
     if ( empty( $list_of_embeds) ) {
         $list_of_embeds = array();
     }
-
     require_once( ANVATO_PATH . '/exports/class-amp-anvplayer-embed.php');
     $list_of_embeds['ANVATO_AMP_Anvplayer_Embed_Handler'] = array();
 
     return $list_of_embeds;
 });
+
+// Facebook Instant Articles handler
+add_filter('feed_content_type', function($content_type, $type){
+	if (defined('INSTANT_ARTICLES_SLUG') && $type == INSTANT_ARTICLES_SLUG) {
+		require_once ANVATO_PATH . '/exports/fia-anvplayer-embed.php';
+	}
+	return $content_type;
+}, 10, 2 );
+
