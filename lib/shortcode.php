@@ -159,33 +159,6 @@ function anvato_shortcode_get_parameters( $attr ) {
 	if( isset( $json['video'] ) && is_string( $json['video'] ) && substr( $json['video'], 0, 1 ) === 'c' ) {
 		$json['androidIntentPlayer'] = 'true';
 	}
-	
-	// this is an amp experience
-	if ( (function_exists('is_amp_endpoint') && is_amp_endpoint()) || (defined( 'INSTANT_ARTICLES_SLUG' ) && $type == INSTANT_ARTICLES_SLUG) ) {
-		
-		if(isset($json['video']))
-		{
-			$json['v'] = $json['video'];
-			unset($json['video']);
-		}
-		
-		if(isset($json['playlist']))
-		{
-			$json['pl'] = $json['playlist'];
-			unset($json['playlist']);
-		}
-		
-		$json['m'] = $json['mcp'];
-		
-		unset($json['mcp']);
-		unset($json['width']);
-		unset($json['height']);
-		unset($json['pInstance']);
-		
-		$json['p'] = 'default';
-		$json['html5'] = true;
-		
-	}
 
 	# Allow theme/plugins to filter the JSON before outputting
 	$json = apply_filters( 'anvato_anvp_json', $json, $attr );
@@ -194,6 +167,40 @@ function anvato_shortcode_get_parameters( $attr ) {
 		'json' => $json,
 		'player' => $player,
 	);
+}
+
+/**
+ * Generate parameters (json) for Anvato Shortcode Exports (Google Amp, Facebook Instant Articles)
+ *
+ * @param  array $attr Array of shortcode attributes
+ * @return array       List (json) of parameters
+ */
+function anvato_shortcode_get_parameters__for_exports ( $attr ) {
+
+	$parameters = anvato_shortcode_get_parameters( $attr );
+
+	$parameters['json']['p'] = 'default';
+	$parameters['json']['html5'] = true;
+
+	unset( $parameters['json']['width'] );
+	unset( $parameters['json']['height'] );
+	unset( $parameters['json']['pInstance'] );
+
+	$parameters['json']['m'] = $parameters['json']['mcp'];
+	unset( $parameters['json']['mcp'] );
+	
+	if ( isset( $parameters['json']['video'] ) ) {
+		$parameters['json']['v'] = $parameters['json']['video'];
+		unset($parameters['json']['video']);
+	}
+	
+	if ( isset( $parameters['json']['playlist'] ) ) {
+		$parameters['json']['pl'] = $parameters['json']['playlist'];
+		unset($parameters['json']['playlist']);
+	}
+
+	return $parameters;
+
 }
 
 /**
@@ -212,7 +219,7 @@ function anvato_shortcode( $attr ) {
 	// Regular player
 	$format = "<div id='%s'></div><script data-anvp='%s' src='%s'></script>";
 	return sprintf(
-		$format, 
+		$format,
 		esc_attr( $parameters['json']['pInstance'] ),
 		esc_attr( json_encode( $parameters['json'] ) ),
 		esc_url( $player_url )
