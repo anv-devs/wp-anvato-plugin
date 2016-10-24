@@ -26,7 +26,7 @@ class ANVATO_AMP_Anvplayer_Embed_Handler extends AMP_Base_Embed_Handler {
 
 	public function shortcode( $attr ) {
 
-		$parameters = anvato_shortcode_get_parameters( $attr );
+		$parameters = anvato_shortcode_get_parameters__for_exports( $attr );
 
 		$iframe_src = 'https://w3.cdn.anvato.net/player/prod/anvload.html?key=' . base64_encode( json_encode( $parameters['json'] ) );
 
