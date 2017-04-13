@@ -28,7 +28,7 @@ class ANVATO_AMP_Anvplayer_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$parameters = anvato_shortcode_get_parameters__for_exports( $attr );
 
-		$iframe_src = 'https://w3.cdn.anvato.net/player/prod/anvload.html?key=' . base64_encode( json_encode( $parameters['json'] ) );
+		$iframe_src = 'https://w3.cdn.anvato.net/player/stage/v3/anvload.html?key=' . base64_encode( json_encode( $parameters['json'] ) );
 
 		$iframe_width = 640;
 		if ( !empty( $parameters['player']['width'] ) && 'px' === $parameters['player']['width_type'] ) {
