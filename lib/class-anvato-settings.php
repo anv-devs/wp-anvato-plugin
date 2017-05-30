@@ -169,6 +169,23 @@ class Anvato_Settings {
 					)
 				),
 			),
+			// Google Analytics
+			array(
+					'id' => 'section_google_analytics',
+					'title' => 'Google Analytics Settings',
+					'callback' => array( "Anvato_Callbacks", "__html_line" ),
+					'fields' => array(
+							array(
+									'id' => 'google_account_id',
+									'title' => 'Account Info:',
+									'callback' => array( 'Anvato_Form_Fields', 'textarea' ),
+									'args' => array(
+										'rows' => 2,
+										'cols' => 48,
+										'cs_class' => ''
+							)),
+					),
+			),
 		),
 		self::MONETIZATION_SETTINGS_KEY => array (
 			array(

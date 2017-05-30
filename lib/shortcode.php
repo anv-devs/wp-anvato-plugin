@@ -114,6 +114,14 @@ function anvato_shortcode_get_parameters( $attr ) {
 		}
 	}
 	
+	if(!empty($analytics["google_account_id"])) {
+		$json['plugins']['googleAnalytics'] = json_decode( $analytics['google_account_id'], true );
+	} else {
+		if ( !empty( $attr['plugin_google_trackerid'] ) && $attr['plugin_google_trackerid'] !== 'false' ) {
+			$json['plugins']['googleAnalytics']['trackingId'] = $attr['plugin_google_trackerid'];
+		}
+	}
+
 	foreach($mcp['owners'] as $owner) {
 		if($owner['id'] == $json['station'] && !empty($owner['access_key']))
 		{
