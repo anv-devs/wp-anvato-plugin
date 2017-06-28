@@ -70,6 +70,13 @@ function anvato_shortcode_get_parameters( $attr ) {
 		$json['titleVisible'] = $player['title_visible'] == 'true' ? true : false;
 	}
 
+	if ( !empty($player['player_parameters']) ) {
+		$embed_pars = json_decode( $player['player_parameters'], true );
+		if( !empty($embed_pars) && is_array($embed_pars) ) {
+			$json = array_merge($json,$embed_pars);
+		}
+	}
+
 	if ( !empty( $mcp['mcp']['tkx_key'] ) ) {
 		$json['accessKey'] = $mcp['mcp']['tkx_key'];
 		$json['accessControl']['preview'] = false;

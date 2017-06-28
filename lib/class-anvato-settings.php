@@ -55,6 +55,16 @@ class Anvato_Settings {
 							'title' => 'Title Visible:',
 					),
 					array(
+							'id' => 'player_parameters',
+							'title' => 'Embed Parameters:',
+							'callback' => array( 'Anvato_Form_Fields', 'textarea' ),
+							'args' => array(
+									'rows' => 2,
+									'cols' => 48,
+									'cs_class' => ''
+							)
+					),
+					array(
 						'id' => 'height', 
 						'title' => 'Height:', 
 						'args' => array(
