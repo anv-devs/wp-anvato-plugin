@@ -109,8 +109,6 @@ class MEXP_Anvato_Template extends MEXP_Template
 	 */
 	public function search($id, $tab) 
 	{   
-		usort($this->anv_settings['owners'], array($this, 'sortbylabel'));
-
 		$pref = array('type'=>'vod', 'station' => 0);
 		if( isset($_COOKIE['anv_user_preferences']) )
 		{
@@ -124,12 +122,16 @@ class MEXP_Anvato_Template extends MEXP_Template
 			>
 			<select name="station">
 				<option value=''>Select Station</option>
-				<?php foreach($this->anv_settings['owners'] as $key => $item)
-				{
-					echo "<option ".
-						($pref['station'] === $item['label'] ? 'selected' :'').
-						" value='{$item['id']}'>{$item['label']}</option>";
-				}
+				<?php
+					if ( !empty( $this->anv_settings ) && !empty( $this->anv_settings['owners'] ) ) {
+						usort( $this->anv_settings['owners'], array( $this, 'sortbylabel' ) );
+
+						foreach( $this->anv_settings['owners'] as $key => $item ) {
+							echo '<option value="' . esc_attr( $item['id'] ) . '" ' .
+								selected( $item['label'], $pref['station'], false ) .
+								'>' . esc_html( $item['label'] ) . '</option>';
+						}
+					} // if not-empty anv_serrings owners
 				?>
 			</select>
 			<select onchange="anv_type_select(this)" name='type'>
