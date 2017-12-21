@@ -29,6 +29,7 @@ function anvato_shortcode_get_parameters( $attr ) {
 			'ext_id' => null,
 			'sharelink' => null,
 			'autoplay' => false,
+			'volume' => 0.75,
 		),
 		$attr, 
 		'anvplayer'
