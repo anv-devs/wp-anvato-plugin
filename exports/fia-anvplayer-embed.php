@@ -8,7 +8,7 @@ add_shortcode( 'anvplayer', function( $attr ) {
 
 	$parameters = anvato_shortcode_get_parameters__for_exports( $attr );
 	
-	$iframe_src = 'https://w3.cdn.anvato.net/player/prod/v3/anvload.html?key=' . base64_encode( json_encode( $parameters['json'] ) );
+	$iframe_src = 'https://w3.cdn.anvato.net/player/prod/v3/anvloadfbia.html?anvkey=' . base64_encode( json_encode( $parameters['json'] ) );
 
 	$iframe_width = 640;
 	if ( !empty( $parameters['player']['width'] ) && 'px' === $parameters['player']['width_type'] ) {
