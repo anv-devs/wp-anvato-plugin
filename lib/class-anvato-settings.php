@@ -257,13 +257,8 @@ class Anvato_Settings {
 	private function admin_settings() {
 		if ( !is_admin() ) return;
 
-		wp_enqueue_script(
-			'anvato-common-js',
-			ANVATO_URL . 'lib/common.js', 
-			array('jquery'), 
-			'0.1.5'
-		);
-		
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ) );
+
 		// Add the main Anvato Settings page in "Settings"
 		add_action( 'admin_menu', array( 'Anvato_Callbacks', '__admin_menu' ) );
 
@@ -274,6 +269,18 @@ class Anvato_Settings {
 		if ( has_action( 'plugin_action_links' ) ) {
 			add_filter( 'plugin_action_links', array( 'Anvato_Callbacks','__plugin_action_links' ), 10, 2 );
 		}
+	}
+
+	/**
+	 * Enqueue scripts for the admin.
+	 */
+	public function enqueue_admin_scripts() {
+		wp_enqueue_script(
+			'anvato-common-js',
+			ANVATO_URL . 'lib/common.js',
+			array( 'jquery' ),
+			'0.1.5'
+		);
 	}
 
 	/**
