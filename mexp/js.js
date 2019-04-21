@@ -214,7 +214,7 @@ media.view.MEXP.prototype.fetchedSuccess = function( response )
 function anv_preview(mcp_id, video_id, type, accesskey)
 {
 	var ptype = type === 'video' || type === 'live' ? 'video' : 'playlist';
-	var player_js_url = "http://qa.up.anv.bz/dev/scripts/anvload.js";
+	var player_js_url = "https://w3.cdn.anvato.net/player/prod/v3/scripts/anvload.js";
 	var script = jQuery("<script src='"+player_js_url+"'></script>");
 	if(accesskey)
 	{
