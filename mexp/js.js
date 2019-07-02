@@ -3,12 +3,12 @@
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or
  (at your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  */
 
 // CONTROLLER OVERIDE:
@@ -52,7 +52,7 @@ media.controller.MEXP = media.controller.State.extend({
 	{
 		var selection = this.frame.content.get().getSelection(),
 		urls = [], video_ids = [];
-		
+
 		var multi = (selection.length > 1) ? true : false;
 		var meta;
 		selection.each(function(model)
@@ -87,8 +87,8 @@ media.controller.MEXP = media.controller.State.extend({
 		}
 
 		return "<p>" + _.toArray(urls).join("</p><p>") + "</p>";
-		
-	}        
+
+	}
 });
 
 /*
@@ -111,20 +111,20 @@ media.view.MEXP.prototype.toggleSelectionHandler = function ( event )
 	{
 		this.addToSelection( target, id );
 	}
-	
+
 	this.toggleDFPPreroll( event, id );
 }
 
 media.view.MEXP.prototype.toggleDFPPreroll = function( event, vid_id )
 {
-	
+
 	var selection = this.getSelection();
-	
+
 	if(this.getSelection().get( vid_id ) == null)
 	{
 		jQuery( '#dfp_flag_'+vid_id ).attr('checked',false);
 	}
-	
+
 	if(selection.length > 1)
 	{
 		jQuery( '.mexp-item-meta-dfp-flags' ).find('input').attr('disabled', 'disabled');
@@ -146,12 +146,12 @@ media.view.MEXP.prototype.fetchedEmpty = function( response )
 	this.$el.find( '.mexp-pagination' ).hide();
 
 	this.trigger( 'loaded loaded:noresults', response );
-	
+
 	jQuery( '#' + this.service.id + '-loadmore' ).attr( 'disabled', true ).hide();
 }
 
 /*
- * This method is overwritten to enable the mexp-button after being disabled in updateInput 
+ * This method is overwritten to enable the mexp-button after being disabled in updateInput
  */
 media.view.MEXP.prototype.loaded = function( response )
 {
@@ -214,7 +214,7 @@ media.view.MEXP.prototype.fetchedSuccess = function( response )
 function anv_preview(mcp_id, video_id, type, accesskey)
 {
 	var ptype = type === 'video' || type === 'live' ? 'video' : 'playlist';
-	var player_js_url = "http://qa.up.anv.bz/dev/scripts/anvload.js";
+	var player_js_url = "https://w3.cdn.anvato.net/player/prod/v3/scripts/anvload.js";
 	var script = jQuery("<script src='"+player_js_url+"'></script>");
 	if(accesskey)
 	{
