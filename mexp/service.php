@@ -194,27 +194,27 @@ class MEXP_Anvato_Service extends MEXP_Service
 			$response->add_item(apply_filters('anvato_mexp_response_item', $item, $channel));
 			
 			/**
-			 * Add Monetized Channels
+			 * Add Stitched Streams
 			 */
-			if ( !empty( $channel->monetized_channels ) )
+			if (!empty($channel->stitched_streams))
 			{
-				foreach ( (array) $channel->monetized_channels as $mchannel )
-				{   
+				foreach($channel->stitched_streams->stitched_stream as $stream)
+				{
 					$item = new MEXP_Response_Item();
-					$item->set_content(sanitize_text_field((string) $mchannel->monetized_name) );
-					$item->add_meta("category", "Monetized Live Stream");
-					$item->add_meta("embed_id", "{$mchannel->embed_id}");
+					$item->set_content(sanitize_text_field((string) $stream->name) );
+					$item->add_meta("category", "Stitched Stream");
+					$item->add_meta("embed_id", "{$stream->embed_id}");
 					$item->add_meta("type", "live");
 					$item->add_meta("accesskey",$station['access_key']);
 					$item->add_meta("station", $station['id']);
-					$item->set_id( (string) $mchannel->embed_id );
+					$item->set_id( (string) $stream->embed_id );
 					$icon_url = (string) $channel->icon_url;
 					$icon_url = $icon_url === "" ? ANVATO_URL . 'img/channel_icon.png' : $icon_url;
 					$item->set_thumbnail( (string) $icon_url );
 					$item->set_date( time() );
 					$item->set_date_format("M j, Y, g:i a");
-					$item->url = $this->generate_shortcode((string) $mchannel->embed_id);
-					$response->add_item(apply_filters('anvato_mexp_response_item', $item, $mchannel));
+					$item->url = $this->generate_shortcode((string) $stream->embed_id);
+					$response->add_item(apply_filters('anvato_mexp_response_item', $item, $stream));
 				}
 			}
 			

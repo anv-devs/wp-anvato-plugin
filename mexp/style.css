@@ -23,7 +23,7 @@ a.anv_preview_close:hover{color:#fff}
 .anv_preview_close:before{content:"×"}
 .anvato-playlist-item{height:220px!important}
 .anvato-video-item{height:280px!important}
-.anvato-channel-item{height:230px!important}
+.anvato-channel-item{height:280px!important}
 .wp_anv_textbox{width:100%}
 #anvato-loadmore{display:none!important}
 #doPlaylist{margin:7px 0 0 7px}
