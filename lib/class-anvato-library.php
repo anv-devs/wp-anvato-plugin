@@ -27,6 +27,7 @@ class Anvato_Library {
 		'live' => 'list_embeddable_channels',
 		'playlist' => 'list_playlists',
 		'vod' => 'list_videos',
+		'feed' => 'list_feeds'
 	);
 	
 	/**
@@ -344,6 +345,8 @@ class Anvato_Library {
 			case 'list_videos':
 				return $xml->params->video_list->xpath("//video");
 
+			case 'list_feeds':
+				return $xml->params->feed_list->xpath("//feed");
 		}
 	}
 

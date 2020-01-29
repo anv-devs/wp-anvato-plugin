@@ -41,6 +41,12 @@ function anvato_shortcode_get_parameters( $attr ) {
 	} else if ( !empty( $attr['playlist'] ) ) {
 		unset( $json["video"] );
 		$json["playlist"] = $attr['playlist'];
+	} else if ( !empty($attr['feed'] ) ) {
+		unset( $json["video"] );
+
+		$json["playlist"] = array();
+		$json["playlist"]['type'] = 'feed';
+		$json["playlist"]['id'] = $attr["feed"];
 	} else if ( !empty( $json['ext_id'] ) ) {
 		$extern_ids = explode( ",", $json["ext_id"] );
 		$video_ids = array();

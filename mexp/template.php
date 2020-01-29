@@ -141,6 +141,8 @@ class MEXP_Anvato_Template extends MEXP_Template
 						value='playlist'>Playlists</option>
 				<option <?php echo ($pref['type'] === 'live' ? 'selected' : '') ?>
 					value='live'>Live channel</option>
+				<option <?php echo ($pref['type'] === 'feed' ? 'selected' : '') ?>
+					value='feed'>Feeds</option>
 			</select>
 			<input class="button button-large" type="submit" id="mexp-button"
 				value="<?php esc_attr_e('Search', 'mexp'); ?>"

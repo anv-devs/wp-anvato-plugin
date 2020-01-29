@@ -68,6 +68,9 @@ class MEXP_Anvato_Service extends MEXP_Service
 			case "playlist":
 				$callback = "generate_mexp_response_for_playlist";
 				break;
+			case "feed":
+				$callback = "generate_mexp_response_for_feed";
+				break;
 			case "vod":
 				$params['exp_date'] = date("F j, Y");
 			default:
@@ -162,6 +165,38 @@ class MEXP_Anvato_Service extends MEXP_Service
 		return $response;
 	}
 
+	function generate_mexp_response_for_feed($results) {
+		$response = new MEXP_Response();
+		$station = $this->get_station();
+
+		foreach ($results as $feed)
+		{
+			if ($feed->type != 'video')
+				continue;
+
+			$item = new MEXP_Response_Item();
+			$item->set_content(sanitize_text_field((string) $feed->name));
+
+			$description = mb_strimwidth((string) $feed->description, 0, 50, "...");
+			$item->add_meta("description", sanitize_text_field($description));
+			$item->add_meta("type", "feed");
+			$item->add_meta("accesskey",$station['access_key']);
+			$item->add_meta("station", $station['id']);
+			$feed_id = end(explode('/',$feed->feed_url));
+			$item->set_id($feed_id);
+			$item->url = $this->generate_shortcode($feed_id, 'feed');
+			/**
+			 * Filter the video item to be added to the response.
+			 *
+			 * @param  MEXP_Response_Item $item The response item.
+			 * @param  SimpleXMLElement $video The XML for the video from the API.
+			 */
+			$response->add_item(apply_filters('anvato_mexp_response_item', $item, $feed));
+		}
+
+		return $response;
+	}
+
 	function generate_mexp_response_for_channel($results) 
 	{
 		$response = new MEXP_Response();
@@ -233,7 +268,7 @@ class MEXP_Anvato_Service extends MEXP_Service
 	{
 		$station = $this->get_station();
 		
-		$shortcode = '[anvplayer '.($type==='vod'?'video':'playlist').'="' . esc_attr($video_id) . '"';
+		$shortcode = '[anvplayer '.($type==='vod'?'video':($type=='feed' ? 'feed' : 'playlist')).'="' . esc_attr($video_id) . '"';
 		if(!empty($station)){
 			$shortcode .= ' station="'.esc_attr($station['id']). '"';
 		}
