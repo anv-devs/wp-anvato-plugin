@@ -1,0 +1,30 @@
+{
+  "name": "wp-anvato-plugin",
+  "version": "1.0.0",
+  "description": "Anvato Wordpress Plugin",
+  "scripts": {
+    "start:custom": "wp-scripts start ./src/anv-block.js --output-path=./build",
+    "build": "wp-scripts build ./src/anv-block.js --output-path=./build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anv-devs/wp-anvato-plugin.git"
+  },
+  "keywords": [
+    "anvato"
+  ],
+  "author": "Anvato Devs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anv-devs/wp-anvato-plugin/issues"
+  },
+  "homepage": "https://github.com/anv-devs/wp-anvato-plugin#readme",
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.8.3",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/preset-react": "^7.8.3",
+    "css-loader": "^3.4.2",
+    "@wordpress/scripts": "6.2.0"
+  }
+}

@@ -29,61 +29,98 @@
  * Make sure to only declare them if they do not already exist,
  * just in case these are already declared custom
 */
-if ( !defined('ANVATO_PATH') )          define( 'ANVATO_PATH', dirname( __FILE__ ) );
-if ( !defined('ANVATO_URL') )           define( 'ANVATO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
-if ( !defined('ANVATO_DOMAIN_SLUG') )   define( 'ANVATO_DOMAIN_SLUG',  "wp_anvato" );
+if ( ! defined( 'ANVATO_PATH' ) ) {
+	define( 'ANVATO_PATH', dirname( __FILE__ ) );
+}
+if ( ! defined( 'ANVATO_URL' ) ) {
+	define( 'ANVATO_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
+}
+if ( ! defined( 'ANVATO_DOMAIN_SLUG' ) ) {
+	define( 'ANVATO_DOMAIN_SLUG', 'wp_anvato' );
+}
 
 require_once ANVATO_PATH . '/lib/class-anvato-settings.php';
 require_once ANVATO_PATH . '/lib/class-anvato-library.php';
+require_once ANVATO_PATH . '/rest/class-anvato-rest-service.php';
 
-if ( !is_admin() ) {
-	require_once ANVATO_PATH . '/lib/shortcode.php';
-} else {
+if ( ! function_exists( 'get_current_screen' ) ) {
+	require_once ABSPATH . '/wp-admin/includes/screen.php';
+}
+
+// Anvato Editor Implementations
+if ( is_admin() ) {
+	add_action(
+		'current_screen',
+		function () {
+			$current_screen = get_current_screen();
+
+			// Check whether gutenberg block editor is active or not
+			if ( method_exists( $current_screen, 'is_block_editor' ) && $current_screen->is_block_editor() ) {
+				require_once ANVATO_PATH . '/gutenberg/load.php';
+			}
+		}
+	);
+
 	require_once ANVATO_PATH . '/mexp/load.php';
+} else {
+	require_once ANVATO_PATH . '/lib/shortcode.php';
 }
 
 // Google AMP filter handler
-add_action( 'amp_content_embed_handlers', function( $list_of_embeds ) {
-	if ( empty( $list_of_embeds) ) {
-		$list_of_embeds = array();
+add_action(
+	'amp_content_embed_handlers',
+	function( $list_of_embeds ) {
+		if ( empty( $list_of_embeds ) ) {
+			$list_of_embeds = array();
+		}
+
+		require_once( ANVATO_PATH . '/exports/class-anvato-amp-anvplayer-embed-handler.php' );
+		$list_of_embeds['ANVATO_AMP_Anvplayer_Embed_Handler'] = array();
+
+		return $list_of_embeds;
 	}
-
-	require_once( ANVATO_PATH . '/exports/class-amp-anvplayer-embed.php' );
-	$list_of_embeds['ANVATO_AMP_Anvplayer_Embed_Handler'] = array();
-
-	return $list_of_embeds;
-});
+);
 
 // Facebook Instant Articles handler
-add_filter( 'feed_content_type', function( $content_type, $type ){
-	if ( defined('INSTANT_ARTICLES_SLUG') && $type == INSTANT_ARTICLES_SLUG ) {
-		require_once ANVATO_PATH . '/exports/fia-anvplayer-embed.php';
-	}
-	return $content_type;
-}, 10, 2 );
+add_filter(
+	'feed_content_type',
+	function( $content_type, $type ) {
+		if ( defined( 'INSTANT_ARTICLES_SLUG' ) && INSTANT_ARTICLES_SLUG === $type ) {
+			require_once ANVATO_PATH . '/exports/fia-anvplayer-embed.php';
+		}
+		return $content_type;
+	},
+	10,
+	2
+);
 
 // Setup shortcode handle for FIA
 if ( is_admin() ) {
-	add_action( 'instant_articles_before_transform_post', function ( $this_obj ) {
-/*
-	Issue:
-		Facebook Instant Articles generates post cache on post save.
-		In this case, since the proper FIA AnvatoPlayer is not avaiable, shortcode is not handled.
+	add_action(
+		'instant_articles_before_transform_post',
+		function ( $this_obj ) {
+			/*
+			Issue:
+			Facebook Instant Articles generates post cache on post save.
+			In this case, since the proper FIA AnvatoPlayer is not avaiable, shortcode is not handled.
 
-	Solution:
-		Check for the "instant_articles_before_transform_post", 
-		which is called right before save,
-		and init dedicated Anvato Facebook Instant Articles shortcode.
-*/
+			Solution:
+			Check for the "instant_articles_before_transform_post",
+			which is called right before save,
+			and init dedicated Anvato Facebook Instant Articles shortcode.
+			*/
 
-	if ( !function_exists( 'anvato_shortcode_get_parameters' ) ) {
-		/*
-			because "shortcode" is not included for Admin
-			but it needs to be included to get shortcode options
-		*/
-		require_once ANVATO_PATH . '/lib/shortcode.php';
-	}
-	require_once ANVATO_PATH . '/exports/fia-anvplayer-embed.php';
+			if ( ! function_exists( 'anvato_shortcode_get_parameters' ) ) {
+				/*
+				because "shortcode" is not included for Admin
+				but it needs to be included to get shortcode options
+				*/
+				require_once ANVATO_PATH . '/lib/shortcode.php';
+			}
+			require_once ANVATO_PATH . '/exports/fia-anvplayer-embed.php';
 
-	}, 10, 1 );
+		},
+		10,
+		1
+	);
 } // is_admin - instant_articles_before_transform_post

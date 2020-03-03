@@ -40,3 +40,54 @@ This plugin has a shortcode supports to prepare Anvato video embed code automati
 * `height`
 * `autoplay`
 * `adobe_analytics` (accepts only `false`, which removes all Adobe settings from the output)
+
+Wordress 5 Support
+-----
+
+#### Requirements
+
+* Wordpress 5.3.2 must be installed.
+* Wordpress Rest service must be enabled.
+
+Anvato Gutenberg block implementation resides in plugin's `gutenberg` directory. In this directory, 
+
+* `src` is the directory where block source code resides
+* `build` is the directory where compiled and bundled block code resides, 
+
+#### Build steps
+If you would like to develop or compile Anvato Block source, you will follow build steps below .
+
+ 1. Change current directory to `gutenberg`
+ 2. Make sure `node` and `npm` are installed on your machine.
+ 3. `npm install`
+ 4. `npm run build`
+ 5. (Optional - live reload) `npm run start:custom`
+
+
+Linting
+-----
+
+We are linting our codebase using [PHP Code Sniffer](https://wpvip.com/documentation/how-to-install-php-code-sniffer-for-wordpress-com-vip/) along with two Wordpress rulesets such as `Wordpress-Core` and `WordpressVIPminimum`.
+
+#### Applying rulesets
+To lint the codebase, please run below commands in the plugin root directory.
+
+```
+phpcs --standard=WordPress-Core ./**/*.php --no-cache
+```
+
+```
+phpcs --standard=WordPressVIPminimum ./**/*.php -n --no-cache
+```
+
+#### Fixing errors
+
+To fix automatically, please run below commands in the plugin root directory.
+
+```
+phpcbf --standard=WordPress-Core ./**/*.php --no-cache
+```
+
+```
+phpcbf --standard=WordPressVIPminimum ./**/*.php -n --no-cache
+```

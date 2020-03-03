@@ -43,4 +43,29 @@ This plugin has a shortcode supports to prepare Anvato video embed code automati
 * `autoplay`
 * `adobe_analytics` (accepts only `false`, which removes all Adobe settings from the output)
 
+== Linting ==
+
+We are linting our codebase using PHP Code Sniffer (https://wpvip.com/documentation/how-to-install-php-code-sniffer-for-wordpress-com-vip/) along with two Wordpress rulesets such as `Wordpress-Core` and `WordpressVIPminimum`.
+
+To lint the codebase, please run below commands on the plugin root directory.
+
+```
+phpcs --standard=WordPress-Core ./**/*.php --no-cache
+```
+
+```
+phpcs --standard=WordPressVIPminimum ./**/*.php -n  --no-cache
+```
+
+
+To fix automatically, please run below commands on the plugin root directory.
+
+```
+phpcbf --standard=WordPress-Core ./**/*.php --no-cache
+```
+
+```
+phpcbf --standard=WordPressVIPminimum ./**/*.php -n --no-cache
+```
+
 

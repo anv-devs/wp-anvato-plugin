@@ -1,0 +1,12 @@
+.content-item-container:hover{
+  border-color: #6b6b6b;
+  box-shadow: 0 0 23px 0 rgba(50, 50, 50, 0.6);
+}
+
+.content-item-details-meta-label:after {
+  content: ": "
+}
+
+#anvroot p, #anvroot span, #anvroot div{
+  font-family: "Trebuchet MS", Helvetica, sans-serif !important;
+}
