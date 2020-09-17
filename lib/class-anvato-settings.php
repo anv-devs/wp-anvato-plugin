@@ -453,10 +453,6 @@ if ( ! class_exists( 'Anvato_Settings' ) ) :
 				return;
 			}
 
-			if ( ! wp_verify_nonce( sanitize_text_field( $_GET['_wpnonce'] ) ) ) {
-				return;
-			}
-
 			if ( ! is_admin() ) {
 				return;
 			}
