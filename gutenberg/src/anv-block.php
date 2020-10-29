@@ -12,14 +12,14 @@ add_action(
 			'anv-block',
 			plugin_dir_url( __FILE__ ) . '../build/anv-block.js',
 			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-editor' ),
-			filemtime( '../gutenberg/build/anv-block.js' )
+			filemtime(plugin_dir_path( __FILE__ ) . '../build/anv-block.js')
 		);
 
 		wp_enqueue_style(
 			'anv-block-style',
 			plugin_dir_url( __FILE__ ) . './anv-block-style.css',
 			array(),
-			filemtime( './anv-block-style.css' )
+			filemtime(plugin_dir_path( __FILE__ ) . './anv-block-style.css')
 		);
 	}
 );

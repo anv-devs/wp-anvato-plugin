@@ -44,7 +44,7 @@ This plugin has a shortcode supports to prepare Anvato video embed code automati
 Wordress 5 Support
 -----
 
-#### Requirements
+### Requirements
 
 * Wordpress 5.3.2 must be installed.
 * Wordpress Rest service must be enabled.
@@ -54,7 +54,7 @@ Anvato Gutenberg block implementation resides in plugin's `gutenberg` directory.
 * `src` is the directory where block source code resides
 * `build` is the directory where compiled and bundled block code resides, 
 
-#### Build steps
+### Build steps
 If you would like to develop or compile Anvato Block source, you will follow build steps below .
 
  1. Change current directory to `gutenberg`
@@ -69,7 +69,7 @@ Linting
 
 We are linting our codebase using [PHP Code Sniffer](https://wpvip.com/documentation/how-to-install-php-code-sniffer-for-wordpress-com-vip/) along with two Wordpress rulesets such as `Wordpress-Core` and `WordpressVIPminimum`.
 
-#### Applying rulesets
+### Applying rulesets
 To lint the codebase, please run below commands in the plugin root directory.
 
 ```
@@ -80,7 +80,7 @@ phpcs --standard=WordPress-Core ./**/*.php --no-cache
 phpcs --standard=WordPressVIPminimum ./**/*.php -n --no-cache
 ```
 
-#### Fixing errors
+###	Fixing errors
 
 To fix automatically, please run below commands in the plugin root directory.
 
@@ -91,3 +91,42 @@ phpcbf --standard=WordPress-Core ./**/*.php --no-cache
 ```
 phpcbf --standard=WordPressVIPminimum ./**/*.php -n --no-cache
 ```
+
+
+## Plugin Settings
+
+### Player
+
+`Anvato Player` parameters (`player URL, width, height, title and share link`) are used to decorate player instances. We support additional custom player parameters in `Embed Parameters` field as `JSON` object that are passed to Anvato Player without modification.
+
+### Analytics
+
+Adobe, Comscore and Heartbeat settings have as-is attributes. Please see below for exceptional cases.
+
+Heartbeat Analytics
+
+`Account Info` field can be JSON object that includes all attributes for Heartbeat Analytics. It is also can be used an `account Id` as a single field along with other attributes in the settings.
+
+Google Analytics
+
+`Account Info` field can be JSON object that includes all attributes for Google Analytics. We also support shortcode attribute level Google Analytics tracking ID.
+
+Example: [anvplayer video="9876543" plugin_google_trackerid="UA-12345"]
+
+### Monetization
+
+`One` of the following fields is enough to set `Anvato Player's Google Ad Manager Plugin (formerly DFP)` in `Monetization Tab`. Don't set both fields.
+
+- Google Ad Manager(GAM) Premium Ad Tag
+
+	It is used to set GAM Plugin Adtag URL. It can be also set in shortcode as attribute.
+
+	Example: [anvplayer video="9876543" plugin_dfp_adtagurl="[URL]"]
+
+- Advanced Targeting
+
+	`JSON` object that are passed to `Anvato Player` as `GAM Plugin` object without modification.
+
+	To override GAM client side key values, you can use attribute level setup.
+
+	Example: [anvplayer video="9876543" dfpkeyvalues="[keyValues]"]

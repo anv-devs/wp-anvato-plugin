@@ -53,7 +53,7 @@ if ( ! class_exists( 'Anvato_Settings' ) ) :
 				'comscore_client_id'             => __( 'Client ID', 'wp_anvato' ),
 				'comscore_c3'                    => __( 'C3 Value', 'wp_anvato' ),
 				'google_account_id'              => __( 'Account Info', 'wp_anvato' ),
-				'adtag'                          => __( 'DFP Premium Ad Tag', 'wp_anvato' ),
+				'adtag'                          => __( 'GAM Ad Tag', 'wp_anvato' ),
 				'advanced_targeting'             => __( 'Advanced Targeting', 'wp_anvato' ),
 				'mcp_config'                     => __( 'API Configuration', 'wp_anvato' ),
 				'reset_settings'                 => __( 'Reset settings', 'wp_anvato' ),
@@ -246,7 +246,7 @@ if ( ! class_exists( 'Anvato_Settings' ) ) :
 					'fields'   => array(
 						array(
 							'id'    => 'adtag',
-							'title' => 'DFP Premium Ad Tag',
+							'title' => 'GAM Ad Tag',
 						),
 						array(
 							'id'       => 'advanced_targeting',
@@ -485,9 +485,8 @@ if ( ! class_exists( 'Anvato_Settings' ) ) :
 				</div>
 			<?php } ?>
 
-			<p>Anvato WordPress Plugin allows Anvato Media Content Platform customers to easily insert players into posts that play video on demand clips as well as live channels.</p>
+			<p><strong>Anvato WordPress Plugin</strong>  allows <strong>Anvato Media Content Platform</strong> customers to easily insert players into posts that play video on demand clips as well as live channels and feeds.</p>
 
-			<?php screen_icon(); ?>
 			<h2 class="nav-tab-wrapper">
 				<?php
 				foreach ( $this->plugin_settings_tabs as $key => $name ) {
